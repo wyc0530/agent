@@ -1,0 +1,73 @@
+# Environment
+.env
+.env.local
+*.env
+*_api_key.txt
+*-api-key-*.txt
+*-Created-*.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+agent-env/
+*.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data
+data/qdrant_store/
+data/vector_store/
+data/checkpoints/
+*.db
+*.sqlite
+*.sqlite3
+
+# Models
+models/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PyCache
+**/__pycache__/
+**/*.pyc
+
+# pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
