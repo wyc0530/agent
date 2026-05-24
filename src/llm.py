@@ -18,8 +18,9 @@ class LLMProvider:
         if cls._instance is None:
             try:
                 cls._instance = super().__new__(cls)
-            except Exception:
+            except (TypeError, RuntimeError, AttributeError) as e:
                 cls._instance = None
+                logger.error(f"LLMProvider 单例创建失败: {e}")
                 raise
         return cls._instance
 
@@ -79,15 +80,16 @@ class LLMProvider:
         self,
         messages: list[BaseMessage],
         use_local: bool = False,
+        **kwargs: Any,
     ) -> AIMessage:
         model = self._local_model if use_local and self._local_model else self._model
         if model is None:
             raise RuntimeError("没有可用的LLM模型")
 
         try:
-            result = model.invoke(messages)
+            result = model.invoke(messages, **kwargs)
             if isinstance(result, BaseMessage):
-                return AIMessage(content=result.content)
+                return result
             return AIMessage(content=str(result))
         except Exception as e:
             logger.error(f"LLM调用失败: {e}")
@@ -100,15 +102,16 @@ class LLMProvider:
         self,
         messages: list[BaseMessage],
         use_local: bool = False,
+        **kwargs: Any,
     ) -> AIMessage:
         model = self._local_model if use_local and self._local_model else self._model
         if model is None:
             raise RuntimeError("没有可用的LLM模型")
 
         try:
-            result = await model.ainvoke(messages)
+            result = await model.ainvoke(messages, **kwargs)
             if isinstance(result, BaseMessage):
-                return AIMessage(content=result.content)
+                return result
             return AIMessage(content=str(result))
         except Exception as e:
             logger.warning(f"LLM异步调用失败: {e}")
@@ -140,12 +143,14 @@ class LLMProvider:
         user_message: str,
         system_prompt: str = "",
         use_local: bool = False,
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
     ) -> str:
         messages: list[BaseMessage] = []
         if system_prompt:
             messages.append(SystemMessage(content=system_prompt))
         messages.append(HumanMessage(content=user_message))
-        response = self.invoke(messages, use_local=use_local)
+        response = self.invoke(messages, use_local=use_local, temperature=temperature, max_tokens=max_tokens)
         return response.content
 
     async def achat(
@@ -170,7 +175,17 @@ class LLMProvider:
         messages: list[BaseMessage] = []
         if system_prompt:
             messages.append(SystemMessage(content=system_prompt))
-        messages.extend(history)
+        for msg in history:
+            content = msg.get("content", "") if isinstance(msg, dict) else (getattr(msg, "content", ""))
+            role = msg.get("role", "user") if isinstance(msg, dict) else getattr(msg, "type", "human")
+            if role not in ("system", "ai", "assistant", "human", "user"):
+                role = "user"
+            if role in ("assistant", "ai"):
+                messages.append(AIMessage(content=content))
+            elif role == "system":
+                continue
+            else:
+                messages.append(HumanMessage(content=content))
         messages.append(HumanMessage(content=user_message))
         response = self.invoke(messages)
         return response.content
@@ -179,15 +194,9 @@ class LLMProvider:
         health = {
             "provider": Settings.LLM_PROVIDER,
             "model": Settings.LLM_MODEL,
-            "api_available": False,
+            "api_available": self._model is not None,
             "local_available": self._local_model is not None,
         }
-        try:
-            result = self.invoke([HumanMessage(content="ping")])
-            health["api_available"] = True
-            health["api_response"] = result.content[:100]
-        except Exception as e:
-            health["api_error"] = str(e)[:200]
         return health
 
 

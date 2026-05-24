@@ -4,6 +4,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Optional
 
+from langgraph.graph import StateGraph, END
+
 from src.config import logger
 from src.core.state import AgentOutput, AgentRole, LearningState
 
@@ -109,19 +111,16 @@ class AgentCommunication:
             logger.warning(f"Agent未注册 | target={target.value}")
             return None
 
-        signal = AgentSignal(
-            type=SignalType.STATE_CHANGED,
-            source=source,
-            target=target,
-            payload=payload,
-        )
-
         try:
             if asyncio.iscoroutinefunction(handler):
-                result = await handler(signal)
+                result = await handler(payload)
             else:
+                adapted_state = {
+                    "agent_outputs": payload,
+                    "messages": [{"role": "user", "content": payload.get("message") or payload.get("query") or payload.get("content") or ""}],
+                }
                 result = await asyncio.get_running_loop().run_in_executor(
-                    None, handler, signal
+                    None, handler, adapted_state, payload.get("message") or payload.get("query") or payload.get("content") or ""
                 )
             logger.info(f"Agent路由成功 | {source.value} -> {target.value}")
             return result if isinstance(result, dict) else {"result": result}
@@ -144,8 +143,12 @@ class AgentCommunication:
                     if asyncio.iscoroutinefunction(target_handler):
                         await target_handler(payload)
                     else:
+                        adapted_state = {
+                            "agent_outputs": payload,
+                            "messages": [{"role": "user", "content": payload.get("message") or payload.get("query") or payload.get("content") or ""}],
+                        }
                         await asyncio.get_running_loop().run_in_executor(
-                            None, target_handler, payload
+                            None, target_handler, adapted_state, payload.get("message") or payload.get("query") or payload.get("content") or ""
                         )
                 except Exception as e:
                     logger.error(f"反馈回路执行异常 | {source_role.value} -> {target_role.value}: {e}")
@@ -164,9 +167,12 @@ class AgentCommunication:
                         target=target_role,
                         payload=payload,
                     )
-                    asyncio.run_coroutine_threadsafe(
-                        self._router.emit(signal), running_loop
-                    )
+                    try:
+                        running_loop.call_soon_threadsafe(
+                            lambda s=signal: asyncio.ensure_future(self._router.emit(s))
+                        )
+                    except RuntimeError:
+                        pass
 
             self._router.subscribe_state(state_listener)
         except RuntimeError:
@@ -196,6 +202,40 @@ class AgentCommunication:
             "current_agent": role.value,
         }
         return new_state
+
+
+def build_agent_graph(agents: dict[AgentRole, Callable]) -> StateGraph:
+    graph = StateGraph(LearningState)
+
+    for role, handler in agents.items():
+        def _make_node(r: AgentRole, h: Callable):
+            def _node(state: LearningState) -> dict[str, Any]:
+                try:
+                    result = h(state)
+                    if isinstance(result, dict):
+                        return result
+                    return {"agent_outputs": {r.value: result}}
+                except Exception as e:
+                    logger.error(f"Agent节点执行失败 | role={r.value}: {e}")
+                    return {"error_message": str(e)}
+            return _node
+        graph.add_node(role.value, _make_node(role, handler))
+
+    roles = list(agents.keys())
+
+    def _route(state: LearningState) -> str:
+        next_agent = state.get("next_agent")
+        if next_agent and next_agent in [r.value for r in agents]:
+            return next_agent
+        return END
+
+    if roles:
+        for role in roles:
+            graph.add_conditional_edges(role.value, _route, [r.value for r in agents] + [END])
+        graph.set_entry_point(roles[0].value)
+
+    logger.info(f"Agent图构建完成 | agents={[r.value for r in roles]}")
+    return graph
 
 
 _router: Optional[AgentRouter] = None

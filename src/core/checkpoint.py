@@ -1,10 +1,103 @@
 import asyncio
+import json
+import os
+import threading
 from typing import Any, Optional
 
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.base import BaseCheckpointSaver
 
 from src.config import Settings, logger
+
+_JSON_ENCODE_ERROR_STR = "<non-serializable>"
+
+
+def _safe_serialize(obj: Any) -> Any:
+    if obj is None:
+        return None
+    if isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, (list, tuple)):
+        return [_safe_serialize(i) for i in obj]
+    if isinstance(obj, dict):
+        return {str(k): _safe_serialize(v) for k, v in obj.items()}
+    try:
+        return str(obj)
+    except Exception:
+        return _JSON_ENCODE_ERROR_STR
+
+
+class FileBackedMemorySaver(MemorySaver):
+    def __init__(self) -> None:
+        super().__init__()
+        self._persist_path = str(Settings.resolve_path(Settings.CHECKPOINT_STORE_PATH))
+        os.makedirs(self._persist_path, exist_ok=True)
+        self._file_path = os.path.join(self._persist_path, "checkpoints.json")
+        self._dirty = False
+        restored = self.load_from_disk()
+        if restored > 0:
+            logger.info(f"Checkpoint 从磁盘恢复 | count={restored}")
+
+    def put(self, config: dict, checkpoint: dict, metadata: dict, new_versions: dict) -> dict:
+        result = super().put(config, checkpoint, metadata, new_versions)
+        self._dirty = True
+        threading.Thread(target=self._safe_save, daemon=True).start()
+        return result
+
+    def _safe_save(self) -> None:
+        try:
+            storage = getattr(self, "storage", {})
+            count = 0
+            try:
+                count = len(self.list({}))
+            except Exception:
+                count = len(storage)
+            data = {
+                "checkpoint_count": count,
+                "storage": _safe_serialize(storage),
+            }
+            with open(self._file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, default=str)
+            self._dirty = False
+        except Exception as e:
+            logger.warning(f"Checkpoint 持久化写入失败: {e}")
+
+    def save_to_disk(self) -> None:
+        self._safe_save()
+
+    def load_from_disk(self) -> int:
+        try:
+            if os.path.exists(self._file_path):
+                with open(self._file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if "storage" in data and hasattr(self, "storage"):
+                    for k, v in data["storage"].items():
+                        self.storage[k] = v
+                return data.get("checkpoint_count", 0)
+        except (json.JSONDecodeError, OSError) as e:
+            logger.warning(f"Checkpoint 持久化读取失败（将重置）: {e}")
+            try:
+                os.remove(self._file_path)
+            except OSError:
+                pass
+            self._cleanup_legacy_file()
+        except Exception as e:
+            logger.warning(f"Checkpoint 持久化读取失败（将重置）: {e}")
+            try:
+                os.remove(self._file_path)
+            except OSError:
+                pass
+            self._cleanup_legacy_file()
+        return 0
+
+    def _cleanup_legacy_file(self) -> None:
+        legacy_path = os.path.join(self._persist_path, "checkpoints.pkl")
+        if os.path.exists(legacy_path):
+            try:
+                os.remove(legacy_path)
+                logger.info("已移除旧版pickle格式checkpoint文件")
+            except OSError:
+                pass
 
 
 class CheckpointManager:
@@ -16,16 +109,17 @@ class CheckpointManager:
         if cls._instance is None:
             try:
                 cls._instance = super().__new__(cls)
-            except Exception:
+            except (TypeError, RuntimeError, AttributeError) as e:
                 cls._instance = None
+                logger.error(f"CheckpointManager 单例创建失败: {e}")
                 raise
         return cls._instance
 
     def __init__(self) -> None:
         if self._saver is not None:
             return
-        self._saver = MemorySaver()
-        logger.info("Checkpoint 管理器初始化完成 | backend=memory")
+        self._saver = FileBackedMemorySaver()
+        logger.info(f"Checkpoint 管理器初始化完成 | backend=file_backed_memory path={Settings.CHECKPOINT_STORE_PATH}")
 
     @property
     def saver(self) -> Optional[BaseCheckpointSaver[int]]:

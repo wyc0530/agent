@@ -33,7 +33,7 @@ class WebSearchTool(BaseTool):
         if Settings.SERPAPI_API_KEY and Settings.SERPAPI_API_KEY != "your-serpapi-key-here":
             try:
                 results = self._search_serpapi(query, num_results)
-            except Exception as e:
+            except (requests.RequestException, ValueError, KeyError, TypeError) as e:
                 logger.warning(f"SerpAPI 搜索失败: {e}")
                 results = self._search_fallback(query, num_results)
         else:
@@ -65,18 +65,43 @@ class WebSearchTool(BaseTool):
         return results
 
     def _search_fallback(self, query: str, num: int) -> list[dict[str, Any]]:
-        return self._search_course_directories(query, num)
+        results = self._search_course_directories(query, num)
+        try:
+            web_results = self._search_duckduckgo(query, num)
+            results.extend(web_results)
+        except (requests.RequestException, ValueError, TypeError, KeyError) as e:
+            logger.debug(f"DuckDuckGo 搜索失败: {e}")
+        return results[:num]
+
+    def _search_duckduckgo(self, query: str, num: int) -> list[dict[str, Any]]:
+        try:
+            resp = requests.get(
+                "https://api.duckduckgo.com/",
+                params={"q": query, "format": "json", "no_html": 1, "skip_disambig": 1},
+                timeout=10,
+            )
+            data = resp.json()
+            results = []
+            for topic in data.get("RelatedTopics", [])[:num]:
+                if isinstance(topic, dict) and topic.get("Text"):
+                    results.append({
+                        "title": topic.get("FirstURL", "").split("/")[-1].replace("_", " "),
+                        "url": topic.get("FirstURL", ""),
+                        "snippet": topic.get("Text", ""),
+                        "source": "DuckDuckGo",
+                    })
+            return results
+        except (requests.RequestException, ValueError, TypeError, KeyError) as e:
+            logger.debug(f"DuckDuckGo搜索异常: {e}")
+            return []
 
     def _search_course_directories(self, query: str, num: int) -> list[dict[str, Any]]:
-        platforms = {
-            "中国大学MOOC": f"https://www.icourse163.org/search.htm?search={urllib.parse.quote(query)}",
-            "B站": f"https://search.bilibili.com/all?keyword={urllib.parse.quote(query)}",
-            "知乎": f"https://www.zhihu.com/search?type=content&q={urllib.parse.quote(query)}",
-            "CSDN": f"https://so.csdn.net/so/search?q={urllib.parse.quote(query)}",
-        }
+        platforms = Settings.COURSE_SEARCH_PLATFORMS
 
         results = []
-        for platform, url in platforms.items():
+        encoded_query = urllib.parse.quote(query)
+        for platform, url_template in Settings.COURSE_SEARCH_PLATFORMS.items():
+            url = url_template.replace("{query}", encoded_query)
             results.append({
                 "title": f"[{platform}] 搜索: {query}",
                 "url": url,
@@ -91,12 +116,9 @@ class WebSearchTool(BaseTool):
 class MultiSourceSearcher:
     def __init__(self) -> None:
         self._web_tool = WebSearchTool()
-        self._sources: list[str] = ["web", "course", "paper", "qa"]
 
-    def search_all(self, query: str, num_per_source: int = 3) -> dict[str, list[dict[str, Any]]]:
-        result: dict[str, list[dict[str, Any]]] = {}
-        result["web"] = self._web_tool.execute(query=query, num_results=num_per_source)
-        return result
+    def search_all(self, query: str, num_per_source: int = 3) -> dict[str, list]:
+        return {"web": self._web_tool.execute(query=query, num_results=num_per_source)}
 
     def search_single(self, query: str, source: str = "web", num: int = 5) -> list[dict[str, Any]]:
         if source == "web":

@@ -1,0 +1,2227 @@
+{
+  "sessions": [
+    {
+      "session_id": "b7d30628",
+      "start_time": 1779552746.2359152,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T00:12:26.235915",
+      "end_time": 1779552746.2359152,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T00:12:26.235915"
+    },
+    {
+      "session_id": "768c63ef",
+      "start_time": 1779553364.3131745,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T00:22:44.313174",
+      "end_time": 1779553364.3131745,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T00:22:44.313174"
+    },
+    {
+      "session_id": "e76daa9a",
+      "start_time": 1779553507.9984007,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T00:25:07.998400",
+      "end_time": 1779553507.9984007,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T00:25:07.998400"
+    },
+    {
+      "session_id": "778006d4",
+      "start_time": 1779553952.4146798,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T00:32:32.414679",
+      "end_time": 1779553952.4146798,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T00:32:32.414679"
+    },
+    {
+      "session_id": "e584bc16",
+      "start_time": 1779554156.5663772,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T00:35:56.566377",
+      "end_time": 1779554156.5663772,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T00:35:56.566377"
+    },
+    {
+      "session_id": "c1a65b5a",
+      "start_time": 1779593291.4957538,
+      "topic": "什么是递归",
+      "started_at": "2026-05-24T11:28:11.495753",
+      "end_time": 1779593291.4957538,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:28:11.495753"
+    },
+    {
+      "session_id": "26504818",
+      "start_time": 1779593299.811549,
+      "topic": "帮我制定计划并解答问题",
+      "started_at": "2026-05-24T11:28:19.811549",
+      "end_time": 1779593299.811549,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:28:19.811549"
+    },
+    {
+      "session_id": "76bcc10c",
+      "start_time": 1779593341.1830895,
+      "topic": "什么是递归",
+      "started_at": "2026-05-24T11:29:01.183089",
+      "end_time": 1779593341.1830895,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:29:01.183089"
+    },
+    {
+      "session_id": "9459301c",
+      "start_time": 1779593349.75373,
+      "topic": "帮我制定计划并解答问题",
+      "started_at": "2026-05-24T11:29:09.753730",
+      "end_time": 1779593349.75373,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:29:09.753730"
+    },
+    {
+      "session_id": "30abc8ae",
+      "start_time": 1779593361.939441,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T11:29:21.939440",
+      "end_time": 1779593361.939441,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:29:21.939440"
+    },
+    {
+      "session_id": "a96051fe",
+      "start_time": 1779593409.5137768,
+      "topic": "Learn Python",
+      "started_at": "2026-05-24T11:30:09.513776",
+      "end_time": 1779593409.5137768,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:30:09.513776"
+    },
+    {
+      "session_id": "8028f285",
+      "start_time": 1779593414.687913,
+      "topic": "Learning plan",
+      "started_at": "2026-05-24T11:30:14.687913",
+      "end_time": 1779593414.687913,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:30:14.687913"
+    },
+    {
+      "session_id": "5dc49e51",
+      "start_time": 1779593417.6195016,
+      "topic": "Hello there",
+      "started_at": "2026-05-24T11:30:17.619501",
+      "end_time": 1779593417.6195016,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:30:17.619501"
+    },
+    {
+      "session_id": "766ebf81",
+      "start_time": 1779593418.3808076,
+      "topic": "Help",
+      "started_at": "2026-05-24T11:30:18.380807",
+      "end_time": 1779593418.3808076,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:30:18.380807"
+    },
+    {
+      "session_id": "2b90c370",
+      "start_time": 1779593509.416992,
+      "topic": "什么是递归",
+      "started_at": "2026-05-24T11:31:49.416992",
+      "end_time": 1779593509.416992,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:31:49.416992"
+    },
+    {
+      "session_id": "d47b7440",
+      "start_time": 1779593517.2043133,
+      "topic": "帮我制定计划并解答问题",
+      "started_at": "2026-05-24T11:31:57.204313",
+      "end_time": 1779593517.2043133,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:31:57.204313"
+    },
+    {
+      "session_id": "2a29128b",
+      "start_time": 1779593526.3265455,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T11:32:06.326545",
+      "end_time": 1779593526.3265455,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:32:06.326545"
+    },
+    {
+      "session_id": "e591a485",
+      "start_time": 1779593574.3920481,
+      "topic": "Learn Python",
+      "started_at": "2026-05-24T11:32:54.392048",
+      "end_time": 1779593574.3920481,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:32:54.392048"
+    },
+    {
+      "session_id": "672e449d",
+      "start_time": 1779593579.5586905,
+      "topic": "Learning plan",
+      "started_at": "2026-05-24T11:32:59.558690",
+      "end_time": 1779593579.5586905,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:32:59.558690"
+    },
+    {
+      "session_id": "a7023474",
+      "start_time": 1779593581.8466835,
+      "topic": "Hello there",
+      "started_at": "2026-05-24T11:33:01.846683",
+      "end_time": 1779593581.847661,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:33:01.847661"
+    },
+    {
+      "session_id": "2d394fe2",
+      "start_time": 1779593582.266443,
+      "topic": "Help",
+      "started_at": "2026-05-24T11:33:02.266443",
+      "end_time": 1779593582.266443,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:33:02.266443"
+    },
+    {
+      "session_id": "daeb1110",
+      "start_time": 1779593992.827862,
+      "topic": "什么是递归",
+      "started_at": "2026-05-24T11:39:52.827862",
+      "end_time": 1779593992.827862,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:39:52.827862"
+    },
+    {
+      "session_id": "201f20c4",
+      "start_time": 1779594000.9473476,
+      "topic": "帮我制定计划并解答问题",
+      "started_at": "2026-05-24T11:40:00.947347",
+      "end_time": 1779594000.9473476,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:40:00.947347"
+    },
+    {
+      "session_id": "1c8f3d38",
+      "start_time": 1779594010.0604124,
+      "topic": "Python学习",
+      "started_at": "2026-05-24T11:40:10.060412",
+      "end_time": 1779594010.0604124,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:40:10.060412"
+    },
+    {
+      "session_id": "d2db1d61",
+      "start_time": 1779594057.4713237,
+      "topic": "Learn Python",
+      "started_at": "2026-05-24T11:40:57.471323",
+      "end_time": 1779594057.4713237,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:40:57.471323"
+    },
+    {
+      "session_id": "dbba3c91",
+      "start_time": 1779594062.5607374,
+      "topic": "Learning plan",
+      "started_at": "2026-05-24T11:41:02.560737",
+      "end_time": 1779594062.5607374,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:41:02.560737"
+    },
+    {
+      "session_id": "ca820dc5",
+      "start_time": 1779594065.4431415,
+      "topic": "Hello there",
+      "started_at": "2026-05-24T11:41:05.443141",
+      "end_time": 1779594065.4431415,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:41:05.443141"
+    },
+    {
+      "session_id": "b0893e47",
+      "start_time": 1779594066.1552196,
+      "topic": "Help",
+      "started_at": "2026-05-24T11:41:06.155219",
+      "end_time": 1779594066.1552196,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T11:41:06.155219"
+    },
+    {
+      "session_id": "c9a41d66",
+      "start_time": 1779595200.9061701,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:00:00.906170",
+      "end_time": 1779595200.9061701,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:00:00.906170"
+    },
+    {
+      "session_id": "466886b1",
+      "start_time": 1779595208.779677,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:00:08.779676",
+      "end_time": 1779595208.779677,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:00:08.779676"
+    },
+    {
+      "session_id": "04774123",
+      "start_time": 1779595217.8410656,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T12:00:17.841065",
+      "end_time": 1779595217.8410656,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:00:17.841065"
+    },
+    {
+      "session_id": "83ecd7b9",
+      "start_time": 1779595265.6665945,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:01:05.666594",
+      "end_time": 1779595265.6665945,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:01:05.666594"
+    },
+    {
+      "session_id": "54045a10",
+      "start_time": 1779595270.6414537,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:01:10.641453",
+      "end_time": 1779595270.6414537,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:01:10.641453"
+    },
+    {
+      "session_id": "36735885",
+      "start_time": 1779595273.115858,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:01:13.115858",
+      "end_time": 1779595273.115858,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:01:13.115858"
+    },
+    {
+      "session_id": "e8051e89",
+      "start_time": 1779595273.81976,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T12:01:13.819760",
+      "end_time": 1779595273.81976,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:01:13.819760"
+    },
+    {
+      "session_id": "9507d197",
+      "start_time": 1779595604.2127838,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:06:44.212783",
+      "end_time": 1779595604.2127838,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:06:44.212783"
+    },
+    {
+      "session_id": "d6393287",
+      "start_time": 1779595612.1775339,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:06:52.177533",
+      "end_time": 1779595612.1775339,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:06:52.177533"
+    },
+    {
+      "session_id": "52a22bbb",
+      "start_time": 1779595620.9830546,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T12:07:00.983054",
+      "end_time": 1779595620.9830546,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:07:00.983054"
+    },
+    {
+      "session_id": "7927e06f",
+      "start_time": 1779595667.6602788,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:07:47.660278",
+      "end_time": 1779595667.6602788,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:07:47.660278"
+    },
+    {
+      "session_id": "266f5fb4",
+      "start_time": 1779595672.8346138,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:07:52.834613",
+      "end_time": 1779595672.8346138,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:07:52.834613"
+    },
+    {
+      "session_id": "e4cb2400",
+      "start_time": 1779595675.4399939,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:07:55.439993",
+      "end_time": 1779595675.4399939,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:07:55.439993"
+    },
+    {
+      "session_id": "6c0d64f3",
+      "start_time": 1779595675.9806874,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T12:07:55.980687",
+      "end_time": 1779595675.9806874,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:07:55.980687"
+    },
+    {
+      "session_id": "c0d853f9",
+      "start_time": 1779596887.063484,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:28:07.063483",
+      "end_time": 1779596887.063484,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:28:07.063483"
+    },
+    {
+      "session_id": "3a0a1198",
+      "start_time": 1779596894.9300172,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:28:14.930017",
+      "end_time": 1779596894.9300172,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:28:14.930017"
+    },
+    {
+      "session_id": "4641cd41",
+      "start_time": 1779596905.3716314,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T12:28:25.371631",
+      "end_time": 1779596905.3716314,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:28:25.371631"
+    },
+    {
+      "session_id": "dbe46783",
+      "start_time": 1779596952.320862,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:29:12.320862",
+      "end_time": 1779596952.320862,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:29:12.320862"
+    },
+    {
+      "session_id": "2e09ca0f",
+      "start_time": 1779596957.3827608,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:29:17.382760",
+      "end_time": 1779596957.3827608,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:29:17.382760"
+    },
+    {
+      "session_id": "b04f0dd7",
+      "start_time": 1779596961.0831819,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:29:21.083181",
+      "end_time": 1779596961.0831819,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:29:21.083181"
+    },
+    {
+      "session_id": "28dd9977",
+      "start_time": 1779596961.4750378,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T12:29:21.475037",
+      "end_time": 1779596961.4750378,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:29:21.475037"
+    },
+    {
+      "session_id": "8efdd665",
+      "start_time": 1779597037.2738903,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:30:37.273890",
+      "end_time": 1779597037.2738903,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:30:37.273890"
+    },
+    {
+      "session_id": "52e5e5eb",
+      "start_time": 1779597045.2934678,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:30:45.293467",
+      "end_time": 1779597045.2934678,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:30:45.293467"
+    },
+    {
+      "session_id": "c56fc93a",
+      "start_time": 1779597051.6617727,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T12:30:51.661772",
+      "end_time": 1779597051.6617727,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:30:51.661772"
+    },
+    {
+      "session_id": "ceee12e7",
+      "start_time": 1779597104.481038,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:31:44.481038",
+      "end_time": 1779597104.481038,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:31:44.481038"
+    },
+    {
+      "session_id": "7b9aa1e8",
+      "start_time": 1779597109.2559285,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:31:49.255928",
+      "end_time": 1779597109.2559285,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:31:49.255928"
+    },
+    {
+      "session_id": "35fced72",
+      "start_time": 1779597109.676726,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:31:49.676725",
+      "end_time": 1779597109.676726,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:31:49.676725"
+    },
+    {
+      "session_id": "c13932b5",
+      "start_time": 1779597110.2146583,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T12:31:50.214658",
+      "end_time": 1779597110.2146583,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:31:50.214658"
+    },
+    {
+      "session_id": "01ab36fd",
+      "start_time": 1779597384.2196875,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:36:24.219687",
+      "end_time": 1779597384.2196875,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:36:24.219687"
+    },
+    {
+      "session_id": "ff31ac23",
+      "start_time": 1779597392.2940657,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T12:36:32.294065",
+      "end_time": 1779597392.2940657,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:36:32.294065"
+    },
+    {
+      "session_id": "35122c0e",
+      "start_time": 1779597398.3455315,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T12:36:38.345531",
+      "end_time": 1779597398.3455315,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:36:38.345531"
+    },
+    {
+      "session_id": "cbf950e3",
+      "start_time": 1779597443.6807184,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:37:23.680718",
+      "end_time": 1779597443.6807184,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:37:23.680718"
+    },
+    {
+      "session_id": "50fa5c45",
+      "start_time": 1779597448.4929907,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:37:28.492990",
+      "end_time": 1779597448.4929907,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:37:28.492990"
+    },
+    {
+      "session_id": "56426c0e",
+      "start_time": 1779597448.9510024,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T12:37:28.951002",
+      "end_time": 1779597448.9510024,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:37:28.951002"
+    },
+    {
+      "session_id": "5ecb9d54",
+      "start_time": 1779597449.4130495,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T12:37:29.413049",
+      "end_time": 1779597449.4130495,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T12:37:29.413049"
+    },
+    {
+      "session_id": "988ca73c",
+      "start_time": 1779599129.6409621,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T13:05:29.640962",
+      "end_time": 1779599129.641957,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:05:29.641957"
+    },
+    {
+      "session_id": "f09de427",
+      "start_time": 1779599136.993523,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T13:05:36.993522",
+      "end_time": 1779599136.993523,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:05:36.993522"
+    },
+    {
+      "session_id": "93690bba",
+      "start_time": 1779599142.4651842,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T13:05:42.465184",
+      "end_time": 1779599142.4651842,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:05:42.465184"
+    },
+    {
+      "session_id": "1b338ccc",
+      "start_time": 1779599188.7708306,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:06:28.770830",
+      "end_time": 1779599188.7708306,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:06:28.770830"
+    },
+    {
+      "session_id": "812e2860",
+      "start_time": 1779599193.6072857,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:06:33.607285",
+      "end_time": 1779599193.6072857,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:06:33.607285"
+    },
+    {
+      "session_id": "af8ed90b",
+      "start_time": 1779599194.0395565,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:06:34.039556",
+      "end_time": 1779599194.0395565,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:06:34.039556"
+    },
+    {
+      "session_id": "239f8c19",
+      "start_time": 1779599194.368352,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T13:06:34.368352",
+      "end_time": 1779599194.368352,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:06:34.368352"
+    },
+    {
+      "session_id": "5909e254",
+      "start_time": 1779601849.5695684,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T13:50:49.569568",
+      "end_time": 1779601849.5695684,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:50:49.569568"
+    },
+    {
+      "session_id": "50e35f13",
+      "start_time": 1779601857.366734,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T13:50:57.366734",
+      "end_time": 1779601857.366734,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:50:57.366734"
+    },
+    {
+      "session_id": "7460cc34",
+      "start_time": 1779601863.4868836,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T13:51:03.486883",
+      "end_time": 1779601863.4868836,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:51:03.486883"
+    },
+    {
+      "session_id": "04fde4a2",
+      "start_time": 1779601910.635697,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:51:50.635697",
+      "end_time": 1779601910.635697,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:51:50.635697"
+    },
+    {
+      "session_id": "61835eb5",
+      "start_time": 1779601915.713609,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:51:55.713609",
+      "end_time": 1779601915.713609,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:51:55.713609"
+    },
+    {
+      "session_id": "075431dc",
+      "start_time": 1779601916.3105907,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:51:56.310590",
+      "end_time": 1779601916.3105907,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:51:56.310590"
+    },
+    {
+      "session_id": "482a1be0",
+      "start_time": 1779601916.9209814,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T13:51:56.920981",
+      "end_time": 1779601916.9209814,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:51:56.920981"
+    },
+    {
+      "session_id": "11c7243c",
+      "start_time": 1779602106.9155505,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T13:55:06.915550",
+      "end_time": 1779602106.9155505,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:55:06.915550"
+    },
+    {
+      "session_id": "f15316bd",
+      "start_time": 1779602115.0003164,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T13:55:15.000316",
+      "end_time": 1779602115.0003164,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:55:15.000316"
+    },
+    {
+      "session_id": "d0c41a16",
+      "start_time": 1779602126.352375,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T13:55:26.352375",
+      "end_time": 1779602126.352375,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:55:26.352375"
+    },
+    {
+      "session_id": "91d94e1d",
+      "start_time": 1779602174.1163743,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:56:14.116374",
+      "end_time": 1779602174.1163743,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:56:14.116374"
+    },
+    {
+      "session_id": "ede56b0c",
+      "start_time": 1779602179.2283878,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:56:19.228387",
+      "end_time": 1779602179.2283878,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:56:19.228387"
+    },
+    {
+      "session_id": "990984dd",
+      "start_time": 1779602183.0787723,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T13:56:23.078772",
+      "end_time": 1779602183.0787723,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:56:23.078772"
+    },
+    {
+      "session_id": "ff96a9c7",
+      "start_time": 1779602183.50644,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T13:56:23.506440",
+      "end_time": 1779602183.50644,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T13:56:23.506440"
+    },
+    {
+      "session_id": "c54432a6",
+      "start_time": 1779603026.2611237,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:10:26.261123",
+      "end_time": 1779603026.2611237,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:10:26.261123"
+    },
+    {
+      "session_id": "7549adcf",
+      "start_time": 1779603034.3921132,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:10:34.392113",
+      "end_time": 1779603034.3921132,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:10:34.392113"
+    },
+    {
+      "session_id": "da74f691",
+      "start_time": 1779603040.1620862,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T14:10:40.162086",
+      "end_time": 1779603040.1620862,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:10:40.162086"
+    },
+    {
+      "session_id": "16f1150c",
+      "start_time": 1779603087.170408,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:11:27.170407",
+      "end_time": 1779603087.170408,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:11:27.170407"
+    },
+    {
+      "session_id": "0c3782aa",
+      "start_time": 1779603092.2630146,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:11:32.263014",
+      "end_time": 1779603092.2630146,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:11:32.263014"
+    },
+    {
+      "session_id": "da78f4d5",
+      "start_time": 1779603092.670215,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:11:32.670214",
+      "end_time": 1779603092.670215,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:11:32.670214"
+    },
+    {
+      "session_id": "d7018158",
+      "start_time": 1779603093.0968652,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T14:11:33.096865",
+      "end_time": 1779603093.0968652,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:11:33.096865"
+    },
+    {
+      "session_id": "dd208c5b",
+      "start_time": 1779603490.1130576,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:18:10.113057",
+      "end_time": 1779603490.1130576,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:18:10.113057"
+    },
+    {
+      "session_id": "82d53ae7",
+      "start_time": 1779603498.1521857,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:18:18.152185",
+      "end_time": 1779603498.1521857,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:18:18.152185"
+    },
+    {
+      "session_id": "a5c6c66d",
+      "start_time": 1779603505.4310844,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T14:18:25.431084",
+      "end_time": 1779603505.4310844,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:18:25.431084"
+    },
+    {
+      "session_id": "f7006297",
+      "start_time": 1779603553.4984586,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:19:13.498458",
+      "end_time": 1779603553.4984586,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:19:13.498458"
+    },
+    {
+      "session_id": "2e1dc4e0",
+      "start_time": 1779603558.4656668,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:19:18.465666",
+      "end_time": 1779603558.4668946,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:19:18.466894"
+    },
+    {
+      "session_id": "cc3180cb",
+      "start_time": 1779603559.0853882,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:19:19.085388",
+      "end_time": 1779603559.0853882,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:19:19.085388"
+    },
+    {
+      "session_id": "63d83bd0",
+      "start_time": 1779603559.55448,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T14:19:19.554480",
+      "end_time": 1779603559.55448,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:19:19.554480"
+    },
+    {
+      "session_id": "681b65b3",
+      "start_time": 1779604809.189565,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:40:09.189564",
+      "end_time": 1779604809.189565,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:40:09.189564"
+    },
+    {
+      "session_id": "6ffbfbb7",
+      "start_time": 1779604817.273498,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:40:17.273498",
+      "end_time": 1779604817.273498,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:40:17.273498"
+    },
+    {
+      "session_id": "d6cd3c01",
+      "start_time": 1779604823.1949797,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T14:40:23.194979",
+      "end_time": 1779604823.1949797,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:40:23.194979"
+    },
+    {
+      "session_id": "912876ca",
+      "start_time": 1779604870.206834,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:41:10.206834",
+      "end_time": 1779604870.206834,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:41:10.206834"
+    },
+    {
+      "session_id": "de98f27a",
+      "start_time": 1779604874.9453793,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:41:14.945379",
+      "end_time": 1779604874.9453793,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:41:14.945379"
+    },
+    {
+      "session_id": "2a2dfb05",
+      "start_time": 1779604875.4054487,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:41:15.405448",
+      "end_time": 1779604875.4054487,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:41:15.405448"
+    },
+    {
+      "session_id": "e792b9d7",
+      "start_time": 1779604876.027959,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T14:41:16.027959",
+      "end_time": 1779604876.027959,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:41:16.027959"
+    },
+    {
+      "session_id": "eb18dd10",
+      "start_time": 1779605299.7258186,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:48:19.725818",
+      "end_time": 1779605299.7258186,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:48:19.725818"
+    },
+    {
+      "session_id": "42060e69",
+      "start_time": 1779605307.4979854,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T14:48:27.497985",
+      "end_time": 1779605307.4990025,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:48:27.499002"
+    },
+    {
+      "session_id": "2d0d6d39",
+      "start_time": 1779605313.2914252,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T14:48:33.291425",
+      "end_time": 1779605313.2914252,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:48:33.291425"
+    },
+    {
+      "session_id": "4f9ff665",
+      "start_time": 1779605360.1967163,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:49:20.196716",
+      "end_time": 1779605360.1967163,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:49:20.196716"
+    },
+    {
+      "session_id": "79c656bd",
+      "start_time": 1779605365.364748,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:49:25.364748",
+      "end_time": 1779605365.364748,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:49:25.364748"
+    },
+    {
+      "session_id": "c7923485",
+      "start_time": 1779605365.9622254,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T14:49:25.962225",
+      "end_time": 1779605365.9622254,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:49:25.962225"
+    },
+    {
+      "session_id": "d887d585",
+      "start_time": 1779605366.5661325,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T14:49:26.566132",
+      "end_time": 1779605366.5661325,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T14:49:26.566132"
+    },
+    {
+      "session_id": "60196836",
+      "start_time": 1779607105.2597003,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T15:18:25.259700",
+      "end_time": 1779607105.2603385,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:18:25.260338"
+    },
+    {
+      "session_id": "915c1eac",
+      "start_time": 1779607112.8096697,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T15:18:32.809669",
+      "end_time": 1779607112.8096697,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:18:32.809669"
+    },
+    {
+      "session_id": "04782c44",
+      "start_time": 1779607120.311336,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T15:18:40.311335",
+      "end_time": 1779607120.311336,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:18:40.311335"
+    },
+    {
+      "session_id": "8045f729",
+      "start_time": 1779607170.1429765,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:19:30.142976",
+      "end_time": 1779607170.1429765,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:19:30.142976"
+    },
+    {
+      "session_id": "9da03971",
+      "start_time": 1779607175.1273122,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:19:35.127312",
+      "end_time": 1779607175.1273122,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:19:35.127312"
+    },
+    {
+      "session_id": "41907e20",
+      "start_time": 1779607175.5402634,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:19:35.540263",
+      "end_time": 1779607175.5402634,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:19:35.540263"
+    },
+    {
+      "session_id": "908d58c6",
+      "start_time": 1779607176.1734884,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T15:19:36.173488",
+      "end_time": 1779607176.1744874,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:19:36.174487"
+    },
+    {
+      "session_id": "6e696776",
+      "start_time": 1779607881.9012709,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T15:31:21.901270",
+      "end_time": 1779607881.9012709,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:31:21.901270"
+    },
+    {
+      "session_id": "5399e6ea",
+      "start_time": 1779607889.91261,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T15:31:29.912610",
+      "end_time": 1779607889.91261,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:31:29.912610"
+    },
+    {
+      "session_id": "296f1323",
+      "start_time": 1779607896.0255263,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T15:31:36.025526",
+      "end_time": 1779607896.0255263,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:31:36.025526"
+    },
+    {
+      "session_id": "ff75d530",
+      "start_time": 1779607943.4968188,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:32:23.496818",
+      "end_time": 1779607943.4968188,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:32:23.496818"
+    },
+    {
+      "session_id": "c8812c20",
+      "start_time": 1779607948.6485205,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:32:28.648520",
+      "end_time": 1779607948.6485205,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:32:28.648520"
+    },
+    {
+      "session_id": "4ce600d8",
+      "start_time": 1779607949.2066548,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:32:29.206654",
+      "end_time": 1779607949.2066548,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:32:29.206654"
+    },
+    {
+      "session_id": "2f2ef489",
+      "start_time": 1779607949.7652678,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T15:32:29.765268",
+      "end_time": 1779607949.7652678,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:32:29.765268"
+    },
+    {
+      "session_id": "0bd9c1d7",
+      "start_time": 1779608028.955831,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T15:33:48.955831",
+      "end_time": 1779608028.955831,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:33:48.955831"
+    },
+    {
+      "session_id": "16641269",
+      "start_time": 1779608037.080107,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T15:33:57.080106",
+      "end_time": 1779608037.080107,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:33:57.080106"
+    },
+    {
+      "session_id": "e30dec6f",
+      "start_time": 1779608042.6580129,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T15:34:02.658013",
+      "end_time": 1779608042.6580129,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:34:02.658013"
+    },
+    {
+      "session_id": "72fa2a3d",
+      "start_time": 1779608089.38287,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:34:49.382869",
+      "end_time": 1779608089.38287,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:34:49.382869"
+    },
+    {
+      "session_id": "d6f74d55",
+      "start_time": 1779608094.3184001,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:34:54.318400",
+      "end_time": 1779608094.3184001,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:34:54.318400"
+    },
+    {
+      "session_id": "dc17599b",
+      "start_time": 1779608094.7744374,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T15:34:54.774437",
+      "end_time": 1779608094.7744374,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:34:54.774437"
+    },
+    {
+      "session_id": "48bfe786",
+      "start_time": 1779608095.2138972,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T15:34:55.213897",
+      "end_time": 1779608095.2138972,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:34:55.213897"
+    },
+    {
+      "session_id": "3b0d91fd",
+      "start_time": 1779609593.7243755,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T15:59:53.724375",
+      "end_time": 1779609593.7243755,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T15:59:53.724375"
+    },
+    {
+      "session_id": "c89fec70",
+      "start_time": 1779609601.8623164,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:00:01.862316",
+      "end_time": 1779609601.8623164,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:00:01.862316"
+    },
+    {
+      "session_id": "4fc96c98",
+      "start_time": 1779609607.610171,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T16:00:07.610171",
+      "end_time": 1779609607.610171,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:00:07.610171"
+    },
+    {
+      "session_id": "18b537c5",
+      "start_time": 1779609653.3246274,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:00:53.324627",
+      "end_time": 1779609653.3246274,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:00:53.324627"
+    },
+    {
+      "session_id": "8b58b03c",
+      "start_time": 1779609658.2564297,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:00:58.256429",
+      "end_time": 1779609658.2564297,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:00:58.256429"
+    },
+    {
+      "session_id": "4518373a",
+      "start_time": 1779609658.5606978,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:00:58.560697",
+      "end_time": 1779609658.5606978,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:00:58.560697"
+    },
+    {
+      "session_id": "de54ee73",
+      "start_time": 1779609659.0491836,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T16:00:59.049183",
+      "end_time": 1779609659.0491836,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:00:59.049183"
+    },
+    {
+      "session_id": "1b9ea875",
+      "start_time": 1779609711.554455,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:01:51.554455",
+      "end_time": 1779609711.554455,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:01:51.554455"
+    },
+    {
+      "session_id": "1fa511da",
+      "start_time": 1779609719.5165591,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:01:59.516559",
+      "end_time": 1779609719.5165591,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:01:59.516559"
+    },
+    {
+      "session_id": "0d982554",
+      "start_time": 1779609725.1502552,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T16:02:05.150255",
+      "end_time": 1779609725.1502552,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:02:05.150255"
+    },
+    {
+      "session_id": "9a78c1f3",
+      "start_time": 1779609769.6670065,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:02:49.667006",
+      "end_time": 1779609769.6670065,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:02:49.667006"
+    },
+    {
+      "session_id": "9689df0e",
+      "start_time": 1779609774.6120534,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:02:54.612053",
+      "end_time": 1779609774.6120534,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:02:54.612053"
+    },
+    {
+      "session_id": "204a5d53",
+      "start_time": 1779609775.0597384,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:02:55.059738",
+      "end_time": 1779609775.0607302,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:02:55.060730"
+    },
+    {
+      "session_id": "1aa2265e",
+      "start_time": 1779609775.543276,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T16:02:55.543276",
+      "end_time": 1779609775.543276,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:02:55.543276"
+    },
+    {
+      "session_id": "971b405c",
+      "start_time": 1779609935.963684,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:05:35.963684",
+      "end_time": 1779609935.963684,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:05:35.963684"
+    },
+    {
+      "session_id": "f08819af",
+      "start_time": 1779609943.5069492,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:05:43.506949",
+      "end_time": 1779609943.5079536,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:05:43.507953"
+    },
+    {
+      "session_id": "cf92e382",
+      "start_time": 1779609952.808731,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T16:05:52.808731",
+      "end_time": 1779609952.808731,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:05:52.808731"
+    },
+    {
+      "session_id": "60102459",
+      "start_time": 1779609999.6764765,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:06:39.676476",
+      "end_time": 1779609999.6764765,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:06:39.676476"
+    },
+    {
+      "session_id": "9192c4c8",
+      "start_time": 1779610004.3882766,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:06:44.388276",
+      "end_time": 1779610004.3882766,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:06:44.388276"
+    },
+    {
+      "session_id": "a16e1fa6",
+      "start_time": 1779610006.6517522,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:06:46.651752",
+      "end_time": 1779610006.6517522,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:06:46.651752"
+    },
+    {
+      "session_id": "f2b011b5",
+      "start_time": 1779610007.1237307,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T16:06:47.123730",
+      "end_time": 1779610007.1247373,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:06:47.124737"
+    },
+    {
+      "session_id": "3eddc39e",
+      "start_time": 1779610057.4858103,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:07:37.485810",
+      "end_time": 1779610057.4858103,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:07:37.485810"
+    },
+    {
+      "session_id": "7e8599f0",
+      "start_time": 1779610065.5496182,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:07:45.549618",
+      "end_time": 1779610065.5496182,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:07:45.549618"
+    },
+    {
+      "session_id": "069b84d3",
+      "start_time": 1779610072.958688,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T16:07:52.958688",
+      "end_time": 1779610072.958688,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:07:52.958688"
+    },
+    {
+      "session_id": "c76a3aed",
+      "start_time": 1779610118.9932427,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:08:38.993242",
+      "end_time": 1779610118.9932427,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:08:38.993242"
+    },
+    {
+      "session_id": "4cb86391",
+      "start_time": 1779610123.745647,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:08:43.745646",
+      "end_time": 1779610123.745647,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:08:43.745646"
+    },
+    {
+      "session_id": "82ac9bc2",
+      "start_time": 1779610125.980161,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T16:08:45.980161",
+      "end_time": 1779610125.980161,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:08:45.980161"
+    },
+    {
+      "session_id": "29702f46",
+      "start_time": 1779610126.4524572,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T16:08:46.452457",
+      "end_time": 1779610126.4524572,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:08:46.452457"
+    },
+    {
+      "session_id": "19f130f8",
+      "start_time": 1779612124.088168,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:42:04.088167",
+      "end_time": 1779612124.088168,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:42:04.088167"
+    },
+    {
+      "session_id": "ac96b622",
+      "start_time": 1779612130.6235461,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:42:10.623546",
+      "end_time": 1779612130.6235461,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:42:10.623546"
+    },
+    {
+      "session_id": "c7d16380",
+      "start_time": 1779612137.1311827,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T16:42:17.131182",
+      "end_time": 1779612137.1311827,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:42:17.131182"
+    },
+    {
+      "session_id": "c4326603",
+      "start_time": 1779612221.3233395,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:43:41.323339",
+      "end_time": 1779612221.3233395,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:43:41.323339"
+    },
+    {
+      "session_id": "5be1714d",
+      "start_time": 1779612228.363273,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T16:43:48.363273",
+      "end_time": 1779612228.363273,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:43:48.363273"
+    },
+    {
+      "session_id": "179f9adb",
+      "start_time": 1779612232.5648637,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T16:43:52.564863",
+      "end_time": 1779612232.5648637,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T16:43:52.564863"
+    },
+    {
+      "session_id": "614c2564",
+      "start_time": 1779618324.106097,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T18:25:24.106096",
+      "end_time": 1779618324.106097,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T18:25:24.106096"
+    },
+    {
+      "session_id": "d2530e04",
+      "start_time": 1779618329.0874722,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T18:25:29.087472",
+      "end_time": 1779618329.0874722,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T18:25:29.087472"
+    },
+    {
+      "session_id": "a31c9bfe",
+      "start_time": 1779618335.3798566,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T18:25:35.379856",
+      "end_time": 1779618335.3798566,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T18:25:35.379856"
+    },
+    {
+      "session_id": "8bd725f5",
+      "start_time": 1779618418.3228881,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T18:26:58.322888",
+      "end_time": 1779618418.3228881,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T18:26:58.322888"
+    },
+    {
+      "session_id": "cb3debdb",
+      "start_time": 1779618423.6034229,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T18:27:03.603423",
+      "end_time": 1779618423.6034229,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T18:27:03.603423"
+    },
+    {
+      "session_id": "5abf4b08",
+      "start_time": 1779618428.4708953,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T18:27:08.470895",
+      "end_time": 1779618428.4708953,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T18:27:08.470895"
+    },
+    {
+      "session_id": "b1672f53",
+      "start_time": 1779622292.3936796,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T19:31:32.393679",
+      "end_time": 1779622292.3936796,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:31:32.393679"
+    },
+    {
+      "session_id": "f00408f3",
+      "start_time": 1779622297.3573363,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T19:31:37.357336",
+      "end_time": 1779622297.3573363,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:31:37.357336"
+    },
+    {
+      "session_id": "d1b37873",
+      "start_time": 1779622304.3104305,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T19:31:44.310430",
+      "end_time": 1779622304.3104305,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:31:44.310430"
+    },
+    {
+      "session_id": "52e832cb",
+      "start_time": 1779623580.1275227,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T19:53:00.127522",
+      "end_time": 1779623580.1275227,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:53:00.127522"
+    },
+    {
+      "session_id": "98852d11",
+      "start_time": 1779623585.1264062,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T19:53:05.126406",
+      "end_time": 1779623585.1264062,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:53:05.126406"
+    },
+    {
+      "session_id": "f052f419",
+      "start_time": 1779623587.7037976,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T19:53:07.703797",
+      "end_time": 1779623587.7037976,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:53:07.703797"
+    },
+    {
+      "session_id": "6b7dc877",
+      "start_time": 1779623663.2979996,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T19:54:23.297999",
+      "end_time": 1779623663.2979996,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:54:23.297999"
+    },
+    {
+      "session_id": "6cedefec",
+      "start_time": 1779623667.2431765,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T19:54:27.243176",
+      "end_time": 1779623667.2431765,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:54:27.243176"
+    },
+    {
+      "session_id": "cf7beeed",
+      "start_time": 1779623790.554476,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T19:56:30.554476",
+      "end_time": 1779623790.554476,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:56:30.554476"
+    },
+    {
+      "session_id": "665713f3",
+      "start_time": 1779623795.5243232,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T19:56:35.524323",
+      "end_time": 1779623795.5243232,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:56:35.524323"
+    },
+    {
+      "session_id": "718d94b1",
+      "start_time": 1779623797.998993,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T19:56:37.998992",
+      "end_time": 1779623797.998993,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:56:37.998992"
+    },
+    {
+      "session_id": "95960408",
+      "start_time": 1779623876.9045353,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T19:57:56.904535",
+      "end_time": 1779623876.9045353,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:57:56.904535"
+    },
+    {
+      "session_id": "96c8028c",
+      "start_time": 1779623880.8133771,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T19:58:00.813376",
+      "end_time": 1779623880.8133771,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T19:58:00.813376"
+    },
+    {
+      "session_id": "3e58a492",
+      "start_time": 1779624073.28608,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:01:13.286080",
+      "end_time": 1779624073.28608,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:01:13.286080"
+    },
+    {
+      "session_id": "431a4cb0",
+      "start_time": 1779624077.2865407,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T20:01:17.286540",
+      "end_time": 1779624077.2865407,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:01:17.286540"
+    },
+    {
+      "session_id": "daf21a61",
+      "start_time": 1779624127.8417618,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T20:02:07.841761",
+      "end_time": 1779624127.8417618,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:02:07.841761"
+    },
+    {
+      "session_id": "217fe216",
+      "start_time": 1779624132.6750236,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T20:02:12.675023",
+      "end_time": 1779624132.6750236,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:02:12.675023"
+    },
+    {
+      "session_id": "f8d089e2",
+      "start_time": 1779624136.7641728,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T20:02:16.764172",
+      "end_time": 1779624136.7641728,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:02:16.764172"
+    },
+    {
+      "session_id": "597f6dbb",
+      "start_time": 1779624210.8787415,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:03:30.878741",
+      "end_time": 1779624210.8787415,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:03:30.878741"
+    },
+    {
+      "session_id": "8e8767ad",
+      "start_time": 1779624214.1257243,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T20:03:34.125724",
+      "end_time": 1779624214.1257243,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:03:34.125724"
+    },
+    {
+      "session_id": "79d3b607",
+      "start_time": 1779624287.6399498,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:04:47.639949",
+      "end_time": 1779624287.6399498,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:04:47.639949"
+    },
+    {
+      "session_id": "ce77301a",
+      "start_time": 1779624290.4694874,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:04:50.469487",
+      "end_time": 1779624290.4729307,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:04:50.472930"
+    },
+    {
+      "session_id": "05180782",
+      "start_time": 1779624293.634469,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:04:53.634469",
+      "end_time": 1779624293.638771,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:04:53.638771"
+    },
+    {
+      "session_id": "ca649b92",
+      "start_time": 1779624294.4000502,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T20:04:54.400050",
+      "end_time": 1779624294.4010594,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:04:54.401059"
+    },
+    {
+      "session_id": "b5e42770",
+      "start_time": 1779624407.2373056,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T20:06:47.237305",
+      "end_time": 1779624407.2373056,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:06:47.237305"
+    },
+    {
+      "session_id": "da8467b9",
+      "start_time": 1779624413.668643,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T20:06:53.668643",
+      "end_time": 1779624413.668643,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:06:53.668643"
+    },
+    {
+      "session_id": "6719c087",
+      "start_time": 1779624418.7936616,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T20:06:58.793661",
+      "end_time": 1779624418.7936616,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:06:58.793661"
+    },
+    {
+      "session_id": "cb69c19c",
+      "start_time": 1779624501.1434877,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:08:21.143487",
+      "end_time": 1779624501.1434877,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:08:21.143487"
+    },
+    {
+      "session_id": "b84311ec",
+      "start_time": 1779624503.5234034,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:08:23.523403",
+      "end_time": 1779624503.5234034,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:08:23.523403"
+    },
+    {
+      "session_id": "e4ba9b6f",
+      "start_time": 1779624506.569819,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T20:08:26.569819",
+      "end_time": 1779624506.569819,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:08:26.569819"
+    },
+    {
+      "session_id": "455187ac",
+      "start_time": 1779624507.220129,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T20:08:27.220129",
+      "end_time": 1779624507.220129,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T20:08:27.220129"
+    },
+    {
+      "session_id": "4c240cef",
+      "start_time": 1779629195.0439477,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:26:35.043947",
+      "end_time": 1779629195.0439477,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:26:35.043947"
+    },
+    {
+      "session_id": "507a3456",
+      "start_time": 1779629196.1107063,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:26:36.110706",
+      "end_time": 1779629196.1107063,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:26:36.110706"
+    },
+    {
+      "session_id": "80a68212",
+      "start_time": 1779629196.6123579,
+      "topic": "Create plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:26:36.612357",
+      "end_time": 1779629213.1937902,
+      "elapsed_minutes": 0.28,
+      "stopped_at": "2026-05-24T21:26:53.193790"
+    },
+    {
+      "session_id": "324c8cc3",
+      "start_time": 1779629214.632946,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:26:54.632945",
+      "end_time": 1779629214.632946,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:26:54.632945"
+    },
+    {
+      "session_id": "ea0d8958",
+      "start_time": 1779629215.3427854,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T21:26:55.342785",
+      "end_time": 1779629215.3427854,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:26:55.342785"
+    },
+    {
+      "session_id": "b36bc379",
+      "start_time": 1779629357.8653173,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:29:17.865317",
+      "end_time": 1779629357.8653173,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:29:17.865317"
+    },
+    {
+      "session_id": "f10c4fe3",
+      "start_time": 1779629358.8347359,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:29:18.834735",
+      "end_time": 1779629358.8347359,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:29:18.834735"
+    },
+    {
+      "session_id": "40f94a16",
+      "start_time": 1779629359.3607495,
+      "topic": "Create plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:29:19.360749",
+      "end_time": 1779629388.237455,
+      "elapsed_minutes": 0.48,
+      "stopped_at": "2026-05-24T21:29:48.237454"
+    },
+    {
+      "session_id": "ed82943c",
+      "start_time": 1779629388.7116838,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:29:48.711683",
+      "end_time": 1779629388.7116838,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:29:48.711683"
+    },
+    {
+      "session_id": "e9ec78bd",
+      "start_time": 1779629389.3968656,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T21:29:49.396865",
+      "end_time": 1779629389.3968656,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:29:49.396865"
+    },
+    {
+      "session_id": "797e8bae",
+      "start_time": 1779630765.1615942,
+      "topic": "Learn Python",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:52:45.161594",
+      "end_time": 1779630765.1615942,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:52:45.161594"
+    },
+    {
+      "session_id": "0598c02c",
+      "start_time": 1779630775.3514285,
+      "topic": "Learning plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:52:55.351428",
+      "end_time": 1779630775.3514285,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:52:55.351428"
+    },
+    {
+      "session_id": "06cdc71c",
+      "start_time": 1779630775.896697,
+      "topic": "Create plan",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:52:55.896697",
+      "end_time": 1779630796.4454143,
+      "elapsed_minutes": 0.34,
+      "stopped_at": "2026-05-24T21:53:16.445414"
+    },
+    {
+      "session_id": "a7e1f07c",
+      "start_time": 1779630796.767739,
+      "topic": "Hello there",
+      "user_id": "e2e_test",
+      "started_at": "2026-05-24T21:53:16.767739",
+      "end_time": 1779630796.767739,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:53:16.767739"
+    },
+    {
+      "session_id": "2456eba5",
+      "start_time": 1779630798.7999058,
+      "topic": "Help",
+      "user_id": "",
+      "started_at": "2026-05-24T21:53:18.799905",
+      "end_time": 1779630798.7999058,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T21:53:18.799905"
+    },
+    {
+      "session_id": "dba1bdbc",
+      "start_time": 1779632453.0176828,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T22:20:53.017682",
+      "end_time": 1779632453.0176828,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T22:20:53.017682"
+    },
+    {
+      "session_id": "da00a824",
+      "start_time": 1779632510.4365432,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T22:21:50.436543",
+      "end_time": 1779632510.4365432,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T22:21:50.436543"
+    },
+    {
+      "session_id": "20254da0",
+      "start_time": 1779632524.8866336,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T22:22:04.886633",
+      "end_time": 1779632524.8866336,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T22:22:04.886633"
+    },
+    {
+      "session_id": "10abe1e0",
+      "start_time": 1779632750.916952,
+      "topic": "Python学习",
+      "user_id": "",
+      "started_at": "2026-05-24T22:25:50.916951",
+      "end_time": 1779632750.916952,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T22:25:50.916951"
+    },
+    {
+      "session_id": "322daa14",
+      "start_time": 1779632836.857287,
+      "topic": "什么是递归",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T22:27:16.857286",
+      "end_time": 1779632836.857287,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T22:27:16.857286"
+    },
+    {
+      "session_id": "8d59d966",
+      "start_time": 1779632878.5893369,
+      "topic": "帮我制定计划并解答问题",
+      "user_id": "test_user",
+      "started_at": "2026-05-24T22:27:58.589336",
+      "end_time": 1779632878.5893369,
+      "elapsed_minutes": 0.0,
+      "stopped_at": "2026-05-24T22:27:58.589336"
+    }
+  ],
+  "active_session": null
+}

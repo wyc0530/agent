@@ -102,8 +102,12 @@ class Retriever:
 
     def check_health(self) -> dict[str, Any]:
         try:
-            docs = self.retrieve("test", top_k=1)
-            return {"status": "ok", "document_count": self._store.count(), "retrieval_test": "passed"}
+            store_health = self._store.check_health()
+            return {
+                "status": store_health.get("status", "ok"),
+                "document_count": store_health.get("document_count", 0),
+                "store_health": store_health,
+            }
         except Exception as e:
             return {"status": "error", "error": str(e)}
 

@@ -58,8 +58,9 @@ class EmbeddingProvider:
         if cls._instance is None:
             try:
                 cls._instance = super().__new__(cls)
-            except Exception:
+            except (TypeError, RuntimeError, AttributeError) as e:
                 cls._instance = None
+                logger.error(f"EmbeddingProvider 单例创建失败: {e}")
                 raise
         return cls._instance
 
@@ -112,6 +113,9 @@ class EmbeddingProvider:
             self._local_model = None
 
     def embed_text(self, text: str) -> list[float]:
+        if not text or not text.strip():
+            raise ValueError("embed_text 不支持空文本")
+
         cached = self._cache.get(text)
         if cached is not None:
             return cached
@@ -150,35 +154,28 @@ class EmbeddingProvider:
         raise RuntimeError("没有可用的 Embedding 模型")
 
     def embed_batch(self, texts: list[str], chunk_size: int = 25) -> list[list[float]]:
-        results: list[list[float]] = []
-        uncached_texts: list[str] = []
-        uncached_indices: list[int] = []
+        results: list[Optional[list[float]]] = [None] * len(texts)
+        seen_uncached: dict[str, list[int]] = {}
 
         for i, text in enumerate(texts):
             cached = self._cache.get(text)
             if cached is not None:
-                results.append(cached)
+                results[i] = cached
             else:
-                uncached_texts.append(text)
-                uncached_indices.append(i)
+                if text not in seen_uncached:
+                    seen_uncached[text] = []
+                seen_uncached[text].append(i)
 
-        for start in range(0, len(uncached_texts), chunk_size):
-            chunk = uncached_texts[start : start + chunk_size]
+        unique_texts = list(seen_uncached.keys())
+        for start in range(0, len(unique_texts), chunk_size):
+            chunk = unique_texts[start : start + chunk_size]
             chunk_vectors = self._embed_batch_impl(chunk)
             for text, vector in zip(chunk, chunk_vectors):
                 self._cache.set(text, vector)
+                for idx in seen_uncached[text]:
+                    results[idx] = vector
 
-        uncached_set = set(uncached_indices)
-        cached_idx = 0
-        final_results: list[list[float]] = []
-        for i in range(len(texts)):
-            if i in uncached_set:
-                final_results.append(self._cache.get(texts[i]) or [])
-            else:
-                final_results.append(results[cached_idx])
-                cached_idx += 1
-
-        return final_results
+        return [r if r is not None else [] for r in results]
 
     def _embed_batch_impl(self, texts: list[str]) -> list[list[float]]:
         if not texts:
@@ -215,7 +212,11 @@ class EmbeddingProvider:
     def similarity(self, vec1: list[float], vec2: list[float]) -> float:
         a = np.array(vec1)
         b = np.array(vec2)
-        return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+        norm_a = np.linalg.norm(a)
+        norm_b = np.linalg.norm(b)
+        if norm_a == 0.0 or norm_b == 0.0:
+            return 0.0
+        return float(np.dot(a, b) / (norm_a * norm_b))
 
     def batch_similarity(
         self, query_vec: list[float], target_vecs: list[list[float]]
@@ -232,16 +233,10 @@ class EmbeddingProvider:
             "provider": Settings.EMBEDDING_PROVIDER,
             "model": Settings.EMBEDDING_MODEL,
             "dimension": Settings.EMBEDDING_DIMENSION,
-            "local_available": hasattr(self, "_local_model") and self._local_model is not None,
+            "local_available": self._local_model is not None,
             "cache_size": self._cache.size if self._cache else 0,
+            "status": "ok" if self._local_model or Settings.DASHSCOPE_API_KEY else "uninitialized",
         }
-        try:
-            vec = self.embed_text("health check")
-            health["dimension"] = len(vec)
-            health["status"] = "ok"
-        except Exception as e:
-            health["status"] = "error"
-            health["error"] = str(e)[:200]
         return health
 
 

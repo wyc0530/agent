@@ -129,6 +129,8 @@ class VectorStore:
     def search(
         self, query: str, top_k: int = 5, filter_metadata: Optional[dict[str, Any]] = None
     ) -> list[dict[str, Any]]:
+        if not query or not query.strip():
+            return []
         query_embedding = self._embedding.embed_text(query)
 
         query_filter = None

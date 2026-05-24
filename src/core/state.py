@@ -1,3 +1,4 @@
+import uuid as _uuid
 from datetime import datetime
 from enum import Enum
 from typing import Annotated, Any, Optional
@@ -34,7 +35,7 @@ class LearningGoal(BaseModel):
 
 class LearningPhase(BaseModel):
     """学习阶段"""
-    phase_id: str = Field(description="阶段ID")
+    phase_id: str = Field(default_factory=lambda: str(_uuid.uuid4())[:8], description="阶段ID")
     title: str = Field(description="阶段名称")
     description: str = Field(default="", description="阶段描述")
     topics: list[str] = Field(default_factory=list, description="学习主题")
@@ -143,15 +144,15 @@ class LearningState(TypedDict, total=False):
     current_agent: str
     agent_outputs: dict[str, AgentOutput]
 
-    learning_plan: Optional[LearningPlan]
-    learning_content: Optional[LearningContent]
+    learning_plan: Optional[dict[str, Any]]
+    learning_content: Optional[dict[str, Any]]
     current_topic: str
 
-    quiz_questions: list[QuizQuestion]
-    quiz_results: list[QuizResult]
-    error_records: list[ErrorRecord]
-    weak_points: list[WeakPoint]
-    ability_report: Optional[AbilityReport]
+    quiz_questions: list[dict[str, Any]]
+    quiz_results: list[dict[str, Any]]
+    error_records: list[dict[str, Any]]
+    weak_points: list[dict[str, Any]]
+    ability_report: Optional[dict[str, Any]]
 
     focus_time_minutes: float
     focus_sessions: list[dict[str, Any]]

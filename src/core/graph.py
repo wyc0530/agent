@@ -261,7 +261,11 @@ class GraphStore:
         )
 
         node_list = [dict(r.get("related", {})) for r in nodes if r.get("related")]
-        node_list.append({"node_id": center_node_id, "name": center_node_id})
+        center_node = self.get_node(center_node_id)
+        if center_node:
+            node_list.append(center_node)
+        else:
+            node_list.append({"node_id": center_node_id, "name": center_node_id})
 
         return {
             "center": center_node_id,
