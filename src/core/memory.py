@@ -36,11 +36,14 @@ class VectorStore:
             self._client = QdrantClient(path=str(persist_dir))
             logger.info(f"Qdrant 本地模式初始化 | path={persist_dir}")
         else:
+            url = Settings.QDRANT_URL
+            if not url.startswith("https://"):
+                url = f"{url}:{Settings.QDRANT_PORT}"
             self._client = QdrantClient(
-                url=f"{Settings.QDRANT_URL}:{Settings.QDRANT_PORT}",
+                url=url,
                 api_key=Settings.QDRANT_API_KEY or None,
             )
-            logger.info(f"Qdrant 远程模式初始化 | url={Settings.QDRANT_URL}:{Settings.QDRANT_PORT}")
+            logger.info(f"Qdrant 远程模式初始化 | url={url}")
 
         try:
             self._client.get_collection(self._collection_name)
@@ -179,12 +182,18 @@ class VectorStore:
         try:
             count = self.count()
             info = self._client.get_collection(self._collection_name)
+            if Settings.QDRANT_USE_LOCAL:
+                storage = "local"
+            elif Settings.QDRANT_URL.startswith("https://"):
+                storage = Settings.QDRANT_URL
+            else:
+                storage = f"{Settings.QDRANT_URL}:{Settings.QDRANT_PORT}"
             return {
                 "status": "ok",
                 "collection": self._collection_name,
                 "document_count": count,
                 "vector_dimension": info.config.params.vectors.size if info.config.params.vectors else 0,
-                "storage": "local" if Settings.QDRANT_USE_LOCAL else f"{Settings.QDRANT_URL}:{Settings.QDRANT_PORT}",
+                "storage": storage,
             }
         except Exception as e:
             return {"status": "error", "error": str(e)}
