@@ -9,7 +9,6 @@ from api_client import (
     get_profile,
     update_profile,
     change_password,
-    check_health,
     logout as api_logout,
     ApiError,
 )
@@ -24,7 +23,6 @@ from components.common import (
     display_success,
     display_warning,
     show_confirmation_dialog,
-    spinner_context,
 )
 from components.chat import trigger_quick_chat
 
@@ -43,7 +41,7 @@ def render_user_info():
     """渲染侧边栏顶部用户信息区域。"""
     display_name = st.session_state.get("display_name") or st.session_state.get("username", "")
     username = st.session_state.get("username", "")
-    st.sidebar.title(f"👋 {display_name}")
+    st.sidebar.title(f"{display_name}")
     st.sidebar.markdown(f"*{username}*")
 
 
@@ -183,20 +181,15 @@ def render_agent_selector():
 
 
 def render_quick_actions():
-    """渲染快捷操作按钮组（健康检查/快速计划/退出登录）。"""
     st.sidebar.markdown("---")
-    col_health, col_plan, col_logout = st.sidebar.columns(3)
-
-    with col_health:
-        if st.button("🔍 检查", key="btn_health_check"):
-            _handle_health_check()
+    col_plan, col_logout = st.sidebar.columns(2)
 
     with col_plan:
-        if st.button("📋 计划", key="btn_quick_plan"):
+        if st.button("📋 计划", key="btn_quick_plan", use_container_width=True):
             trigger_quick_chat("帮我制定一个学习计划", agent_role="planner")
 
     with col_logout:
-        if st.button("🚪 退出", key="btn_logout_trigger"):
+        if st.button("🚪 退出", key="btn_logout_trigger", use_container_width=True):
             st.session_state[LOGOUT_CONFIRM_KEY] = True
 
     if st.session_state.get(LOGOUT_CONFIRM_KEY):
@@ -206,16 +199,6 @@ def render_quick_actions():
         elif st.button("❌ 取消", key="btn_logout_cancel", use_container_width=True):
             st.session_state[LOGOUT_CONFIRM_KEY] = False
             st.rerun()
-
-
-def _handle_health_check():
-    """执行健康检查并在侧边栏显示结果。"""
-    with spinner_context("检查服务状态..."):
-        try:
-            health_data = check_health()
-            display_success(health_data.get("status", "ok"))
-        except ApiError as e:
-            display_error(str(e))
 
 
 def _handle_logout():

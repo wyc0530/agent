@@ -58,6 +58,17 @@ class VectorStore:
             )
             logger.info(f"Qdrant 集合已创建 | collection={self._collection_name} dim={self._vector_dim}")
 
+        _index_fields = ["user_id", "type", "knowledge_point"]
+        for field in _index_fields:
+            try:
+                self._client.create_payload_index(
+                    collection_name=self._collection_name,
+                    field_name=field,
+                    field_schema=qdrant_models.PayloadSchemaType.KEYWORD,
+                )
+            except Exception:
+                pass
+
     @property
     def client(self) -> QdrantClient:
         if self._client is None:

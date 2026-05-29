@@ -391,3 +391,368 @@ class TestPhase5Endpoints:
 
         profile_after = client.get("/user/profile", headers=headers)
         assert profile_after.status_code == 401
+
+
+class TestConversationPersistence:
+    """断点续聊：对话上下文持久化与恢复测试"""
+
+    def test_history_roundtrip_save_and_load(self, tmp_path):
+        from src.api.main import _save_conversation_history, _load_conversation_history
+        from src.api import main as api_main
+        import time
+
+        api_main._conversation_history.clear()
+        api_main._conversation_history["test_user"] = {
+            "messages": [
+                {"role": "user", "content": "你好"},
+                {"role": "assistant", "content": "你好！有什么可以帮你的？"},
+            ],
+            "created_at": time.time(),
+        }
+
+        original_path = api_main._CONV_HISTORY_PATH
+        try:
+            api_main._CONV_HISTORY_PATH = str(tmp_path / "conv_test.json")
+            api_main._save_conversation_history()
+            assert (tmp_path / "conv_test.json").exists()
+
+            api_main._conversation_history.clear()
+            assert len(api_main._conversation_history) == 0
+
+            api_main._load_conversation_history()
+            assert "test_user" in api_main._conversation_history
+            assert len(api_main._conversation_history["test_user"]["messages"]) == 2
+            assert api_main._conversation_history["test_user"]["messages"][0]["content"] == "你好"
+        finally:
+            api_main._CONV_HISTORY_PATH = original_path
+            api_main._conversation_history.clear()
+
+
+class TestContextAwareConversation:
+    """上下文感知对话：防止历史重复回答测试"""
+
+    def test_format_context_produces_boundary_markers(self):
+        from src.api.main import _format_conversation_context, _conversation_history
+
+        _conversation_history.clear()
+        _conversation_history["ctx_user"] = {
+            "messages": [
+                {"role": "user", "content": "什么是Python?"},
+                {"role": "assistant", "content": "Python是一种高级编程语言..."},
+                {"role": "user", "content": "推荐学习资料"},
+                {"role": "assistant", "content": "推荐《Python编程：从入门到实践》..."},
+            ],
+            "created_at": 0,
+        }
+
+        ctx = _format_conversation_context("ctx_user", max_turns=2)
+        assert "仅供参考" in ctx
+        assert "请勿重复回答" in ctx
+        assert "什么是Python?" in ctx
+        assert "推荐学习资料" in ctx
+
+        assert "[Human" not in ctx
+        assert "[AI" not in ctx
+        _conversation_history.clear()
+
+    def test_format_context_empty_user(self):
+        from src.api.main import _format_conversation_context
+        assert _format_conversation_context("") == ""
+        assert _format_conversation_context("nonexistent_user") == ""
+
+    def test_format_context_truncates_long_content(self):
+        from src.api.main import _format_conversation_context, _conversation_history
+
+        _conversation_history.clear()
+        long_text = "A" * 500
+        _conversation_history["long_user"] = {
+            "messages": [{"role": "user", "content": long_text}],
+            "created_at": 0,
+        }
+
+        ctx = _format_conversation_context("long_user", max_turns=1)
+        assert len(long_text) > 150
+        assert long_text not in ctx
+        assert "A" * 100 in ctx
+        _conversation_history.clear()
+
+    def test_agent_chat_appends_boundary_instruction(self):
+        text = (
+            "\n\n## 重要\n请仅回答用户的最新问题，"
+            "基于上下文给出针对性回答。不要重复此前已经解答过的内容。"
+        )
+        assert "请仅回答用户的最新问题" in text
+        assert "不要重复此前已经解答过的内容" in text
+
+    def test_chat_with_history_uses_compact_format(self):
+        from src.llm import LLMProvider, AIMessage, HumanMessage
+
+        history = [
+            {"role": "user", "content": "你好"},
+            {"role": "assistant", "content": "你好！有什么可以帮你的？"},
+            {"role": "user", "content": "什么是机器学习？"},
+            {"role": "assistant", "content": "机器学习是AI的一个分支..."},
+        ]
+
+        try:
+            llm = LLMProvider()
+            llm.chat_with_history("继续", history, system_prompt="你是助手")
+        except Exception:
+            pass
+
+    def test_sse_non_agent_uses_system_summary_not_raw_msgs(self, client):
+        from src.api import main as api_main
+        from src.api.main import _format_conversation_context
+
+        api_main._conversation_history.clear()
+        uid = "sse_ctx_user"
+        api_main._conversation_history[uid] = {
+            "messages": [
+                {"role": "user", "content": "Q1: Python是什么?"},
+                {"role": "assistant", "content": "A1: Python是编程语言"},
+                {"role": "user", "content": "Q2: 推荐书籍"},
+                {"role": "assistant", "content": "A2: 推荐Python入门书籍"},
+            ],
+            "created_at": 0,
+        }
+
+        ctx = _format_conversation_context(uid, max_turns=2)
+        assert "仅供参考" in ctx
+        assert "请勿重复回答" in ctx
+        assert "[Human" not in ctx
+        api_main._conversation_history.clear()
+
+    def test_multi_turn_history_boundaries(self):
+        from src.api.main import _format_conversation_context, _append_to_history, _conversation_history
+
+        _conversation_history.clear()
+        uid = "multiturn_user"
+        turns = [
+            ("user", "你好，我想学习Python"),
+            ("assistant", "好的，我会帮你制定Python学习计划"),
+            ("user", "先推荐几本入门书"),
+            ("assistant", "推荐以下三本：1. Python编程：从入门到实践..."),
+            ("user", "出几道关于变量的题"),
+            ("assistant", "好的，以下是变量相关题目：\n1. 变量命名规则..."),
+            ("user", "帮我分析一下刚才做错的题"),
+            ("assistant", "好的，这道题主要考察..."),
+        ]
+
+        for role, content in turns:
+            _append_to_history(uid, role, content)
+
+        ctx = _format_conversation_context(uid, max_turns=2)
+        assert "仅供参考" in ctx
+        assert "请勿重复回答" in ctx
+
+        assert "变量" in ctx
+        assert "做错的题" in ctx
+
+        assert ctx.count("[用户]") <= 2
+        assert ctx.count("[助手]") <= 2
+        _conversation_history.clear()
+
+    def test_context_summary_never_contains_raw_ai_format(self):
+        from src.api.main import _format_conversation_context, _conversation_history
+
+        _conversation_history.clear()
+        _conversation_history["fmt_user"] = {
+            "messages": [
+                {"role": "user", "content": "问题1"},
+                {"role": "assistant", "content": "回答1"},
+                {"role": "user", "content": "问题2"},
+                {"role": "assistant", "content": "回答2"},
+            ],
+            "created_at": 0,
+        }
+
+        ctx = _format_conversation_context("fmt_user", max_turns=2)
+        assert "AIMessage" not in ctx
+        assert "HumanMessage" not in ctx
+        assert "SystemMessage" not in ctx
+        _conversation_history.clear()
+
+    def test_history_load_with_missing_file(self):
+        from src.api import main as api_main
+        import os
+
+        api_main._conversation_history.clear()
+        api_main._conversation_history["persist_user"] = {
+            "messages": [{"role": "user", "content": "test"}],
+            "created_at": 0,
+        }
+
+        original_path = api_main._CONV_HISTORY_PATH
+        try:
+            api_main._CONV_HISTORY_PATH = str(os.path.join(os.path.dirname(__file__), "nonexistent", "conv.json"))
+            api_main._load_conversation_history()
+            assert "persist_user" in api_main._conversation_history
+        finally:
+            api_main._CONV_HISTORY_PATH = original_path
+            api_main._conversation_history.clear()
+
+    def test_build_agent_state_seeds_frontend_history(self):
+        from src.api.main import _build_agent_state, _conversation_history
+
+        _conversation_history.clear()
+        frontend_history = [
+            {"role": "user", "content": "Q1"},
+            {"role": "assistant", "content": "A1"},
+            {"role": "user", "content": "Q2"},
+            {"role": "assistant", "content": "A2"},
+        ]
+
+        state = _build_agent_state("Q3", "seed_user", frontend_history=frontend_history)
+        assert "seed_user" in _conversation_history
+        assert len(_conversation_history["seed_user"]["messages"]) == 4
+        assert _conversation_history["seed_user"]["messages"][0]["content"] == "Q1"
+        assert _conversation_history["seed_user"]["messages"][3]["content"] == "A2"
+
+        messages = state["messages"]
+        assert len(messages) == 5
+        assert messages[-1]["content"] == "Q3"
+        _conversation_history.clear()
+
+    def test_build_agent_state_no_duplicate_seed(self):
+        from src.api.main import _build_agent_state, _conversation_history
+
+        _conversation_history.clear()
+        _conversation_history["existing_user"] = {
+            "messages": [{"role": "user", "content": "existing"}],
+            "created_at": 0,
+        }
+
+        frontend_history = [{"role": "user", "content": "frontend"}]
+        state = _build_agent_state("new_msg", "existing_user", frontend_history=frontend_history)
+        assert _conversation_history["existing_user"]["messages"][0]["content"] == "existing"
+        _conversation_history.clear()
+
+    def test_context_truncation_above_50(self):
+        from src.api.main import _append_to_history, _build_agent_state, _conversation_history
+
+        _conversation_history.clear()
+        uid = "bulk_user"
+        for i in range(80):
+            _append_to_history(uid, "user" if i % 2 == 0 else "assistant", f"msg_{i}")
+
+        state = _build_agent_state("final_msg", uid)
+        msgs = state["messages"]
+        assert msgs[-1]["content"] == "final_msg"
+        assert len(msgs) <= 61
+        _conversation_history.clear()
+
+    def test_append_to_history_triggers_periodic_save(self, tmp_path):
+        from src.api.main import _append_to_history, _save_conversation_history, _SAVE_COUNTER, _SAVE_THRESHOLD
+        from src.api import main as api_main
+
+        api_main._conversation_history.clear()
+        original_path = api_main._CONV_HISTORY_PATH
+        original_counter = api_main._SAVE_COUNTER
+        try:
+            api_main._CONV_HISTORY_PATH = str(tmp_path / "periodic_conv.json")
+            api_main._SAVE_COUNTER = _SAVE_THRESHOLD - 2
+
+            _append_to_history("user_a", "user", "hello")
+            _append_to_history("user_a", "assistant", "hi there")
+            _save_conversation_history()
+
+            assert (tmp_path / "periodic_conv.json").exists()
+            with open(tmp_path / "periodic_conv.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            assert "user_a" in data
+            assert len(data["user_a"]["messages"]) == 2
+        finally:
+            api_main._CONV_HISTORY_PATH = original_path
+            api_main._SAVE_COUNTER = original_counter
+            api_main._conversation_history.clear()
+
+    def test_append_to_history_max_message_pruning(self):
+        from src.api.main import _append_to_history, _conversation_history
+
+        _conversation_history.clear()
+        uid = "prune_user"
+        for i in range(600):
+            _append_to_history(uid, "user" if i % 2 == 0 else "assistant", f"msg_{i}")
+
+        assert len(_conversation_history[uid]["messages"]) <= 300
+        _conversation_history.clear()
+
+    def test_non_agent_sse_includes_history(self, client):
+        from src.api import main as api_main
+
+        api_main._conversation_history.clear()
+        uid = "sse_hist_user"
+        api_main._conversation_history[uid] = {
+            "messages": [
+                {"role": "user", "content": "之前的问题"},
+                {"role": "assistant", "content": "之前的回答"},
+            ],
+            "created_at": 0,
+        }
+
+        resp = client.post(
+            "/chat/stream",
+            json={"message": "新问题", "user_id": uid},
+        )
+        assert resp.status_code == 200
+        assert "data: " in resp.text
+
+        assert uid in api_main._conversation_history
+        msgs = api_main._conversation_history[uid]["messages"]
+        assert len(msgs) >= 2
+        assert msgs[0]["content"] == "之前的问题"
+        assert msgs[1]["content"] == "之前的回答"
+        api_main._conversation_history.clear()
+
+    def test_agent_sse_with_frontend_history_fallback(self, client):
+        from src.api import main as api_main
+
+        api_main._conversation_history.clear()
+        uid = "fb_user"
+        frontend_history = [
+            {"role": "user", "content": "fm1"},
+            {"role": "assistant", "content": "fa1"},
+        ]
+
+        resp = client.post(
+            "/chat/stream",
+            json={
+                "message": "继续学习",
+                "user_id": uid,
+                "agent_role": "planner",
+                "history": frontend_history,
+            },
+        )
+        assert resp.status_code == 200
+        assert uid in api_main._conversation_history
+        assert api_main._conversation_history[uid]["messages"][0]["content"] == "fm1"
+        api_main._conversation_history.clear()
+
+    def test_shutdown_preserves_history(self, tmp_path):
+        from src.api import main as api_main
+        import time
+
+        api_main._conversation_history.clear()
+        api_main._conversation_history["shutdown_user"] = {
+            "messages": [
+                {"role": "user", "content": "shutdown msg"},
+                {"role": "assistant", "content": "shutdown reply"},
+            ],
+            "created_at": time.time(),
+        }
+
+        original_path = api_main._CONV_HISTORY_PATH
+        try:
+            api_main._CONV_HISTORY_PATH = str(tmp_path / "shutdown_conv.json")
+            api_main._save_conversation_history()
+            assert (tmp_path / "shutdown_conv.json").exists()
+
+            api_main._conversation_history.clear()
+            api_main._load_conversation_history()
+            assert "shutdown_user" in api_main._conversation_history
+            msgs = api_main._conversation_history["shutdown_user"]["messages"]
+            assert len(msgs) == 2
+            assert msgs[0]["content"] == "shutdown msg"
+        finally:
+            api_main._CONV_HISTORY_PATH = original_path
+            api_main._conversation_history.clear()

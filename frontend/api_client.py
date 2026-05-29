@@ -141,7 +141,7 @@ def check_health() -> dict[str, Any]:
     """健康检查。"""
     resp = _safe_request("GET", "/health", timeout=5)
     if resp.status_code == 200:
-        return resp.json()
+        return _safe_json(resp)
     raise ApiError(f"服务异常 ({resp.status_code})", status_code=resp.status_code)
 
 

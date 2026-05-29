@@ -3,8 +3,6 @@
 负责用户认证页面的完整交互流程，包括表单校验、API调用和状态更新。
 """
 
-import time
-
 import streamlit as st
 
 from api_client import login as api_login
@@ -41,12 +39,12 @@ def _validate_login_form(username: str, password: str) -> bool:
 
 def _handle_login(username: str, password: str):
     """执行登录API调用并更新状态。"""
-    _validate_login_form(username, password)
+    if not _validate_login_form(username, password):
+        return
     try:
         auth_data = api_login(username, password)
         _apply_login_state(auth_data)
         display_success("登录成功！")
-        time.sleep(0.5)
         st.rerun()
     except ApiError as e:
         display_error(str(e))
@@ -89,7 +87,6 @@ def _handle_register(
         )
         _apply_login_state(auth_data)
         display_success("注册成功！")
-        time.sleep(0.5)
         st.rerun()
     except ApiError as e:
         display_error(str(e))
@@ -103,9 +100,8 @@ def render_login_page():
     """
     col_center = st.columns([1, 2, 1])[1]
     with col_center:
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        st.markdown("## 📚 学习辅助系统")
-        st.markdown("AI 驱动的个性化学习助手")
+        st.markdown('<div class="login-container" role="region" aria-label="登录区域">', unsafe_allow_html=True)
+        st.markdown("## 学习辅助")
 
         tab_login, tab_register = st.tabs(["登录", "注册"])
 

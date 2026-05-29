@@ -13,9 +13,8 @@ _request_timeout_default: int = 10
 def get_api_base() -> str:
     """获取API基础URL，优先从Streamlit secrets读取，其次环境变量。"""
     try:
-        import streamlit as st
         return st.secrets.get("API_BASE", os.environ.get("API_BASE", "http://localhost:8000"))
-    except ImportError:
+    except Exception:
         return os.environ.get("API_BASE", "http://localhost:8000")
 
 
@@ -79,46 +78,83 @@ SESSION_STATE_DEFAULTS = {
 
 GLOBAL_CSS = """
 <style>
+    :root {
+        --text-body: 1rem;
+        --text-heading: 1.375rem;
+        --text-label: 0.875rem;
+        --color-page: #f8f7f5;
+        --color-surface: #f2f1ee;
+        --color-border: #e2e0db;
+        --color-text-primary: #2d2c2a;
+        --color-text-secondary: #6e6c68;
+        --color-accent: #4a5a7f;
+        --color-accent-hover: #5d6e99;
+        --shadow-card: 0 4px 24px rgba(0,0,0,0.08);
+    }
     .stApp { max-width: 1400px; margin: 0 auto; }
     .login-container {
         max-width: 420px;
-        margin: 60px auto;
-        padding: 2rem;
+        margin: 72px auto;
+        padding: 2.5rem 2rem;
         border-radius: 12px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        background: var(--color-surface);
+        box-shadow: var(--shadow-card);
     }
     .login-container h2 {
         text-align: center;
-        margin-bottom: 0.25rem;
-    }
-    .login-container p {
-        text-align: center;
-        color: #6c757d;
         margin-bottom: 1.5rem;
+        font-size: var(--text-heading);
+        font-weight: 700;
+        color: var(--color-text-primary);
     }
     .chat-container {
-        height: calc(100vh - 300px);
+        max-width: 68ch;
+        margin: 0 auto;
+        height: calc(100vh - 280px);
         overflow-y: auto;
     }
     .sidebar-user-info {
         padding: 8px 0;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-border);
         margin-bottom: 12px;
     }
     .empty-state {
         text-align: center;
-        padding: 40px 20px;
-        color: #9e9e9e;
+        padding: 48px 20px;
+        color: var(--color-text-secondary);
     }
     .empty-state .icon {
         font-size: 48px;
         margin-bottom: 12px;
     }
+    button {
+        min-height: 44px;
+        font-weight: 600;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --color-page: #1a1a18;
+            --color-surface: #252423;
+            --color-border: #3d3c39;
+            --color-text-primary: #e8e6e3;
+            --color-text-secondary: #9e9c98;
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.30);
+        }
+        .stApp { background: var(--color-page); }
+        .stChatMessage [data-testid="stChatMessageContent"] {
+            color: var(--color-text-primary);
+        }
+    }
     @media (max-width: 768px) {
-        .stApp { max-width: 100%; padding: 0 8px; }
-        .login-container { max-width: 100%; margin: 20px auto; padding: 1.25rem; }
-        .empty-state { padding: 24px 12px; }
+        .login-container { max-width: 100%; margin: 28px auto; padding: 1.5rem; }
+        .chat-container { max-width: 100%; }
+        .empty-state { padding: 32px 12px; }
         .empty-state .icon { font-size: 36px; }
         .stMainBlockContainer { padding: 1rem 0.5rem; }
     }
@@ -126,16 +162,14 @@ GLOBAL_CSS = """
 """
 
 MESSAGE_EMPTY_CHAT = """
-### 👋 欢迎使用学习辅助系统
+### 欢迎使用学习辅助系统
 
 我是你的 AI 学习助手，可以帮你：
 
-- 📋 **制定学习计划** — 输入"帮我制定一个学习计划"
-- 📖 **推荐学习资料** — 输入"推荐Python入门资料"
-- ❓ **解答学习问题** — 直接输入你的问题
-- 📝 **生成练习题目** — 输入"出几道算法题"
-- 🔄 **复习错题** — 输入"帮我分析错题"
-- 🎯 **备考指导** — 输入"如何准备面试"
+- 制定学习计划
+- 推荐学习资料
+- 解答学习问题
+- 生成练习题目
 
 在左侧边栏可以选择指定的 Agent 来获得更专业的帮助。试试输入你的第一个问题吧！
 """

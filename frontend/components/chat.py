@@ -5,7 +5,6 @@
 
 import json
 import threading
-import time
 from typing import Optional
 
 import requests
@@ -74,6 +73,10 @@ def stream_chat(
     payload = {
         "message": message,
         "user_id": user_id or st.session_state.get("user_id", ""),
+        "history": [
+            {"role": m["role"], "content": m["content"]}
+            for m in st.session_state.get("messages", [])[-20:]
+        ],
     }
     if agent_role and agent_role != "auto":
         payload["agent_role"] = agent_role
@@ -139,7 +142,7 @@ def _render_streaming_output(
         if len(full_text_container[0]) > last_rendered_length:
             placeholder.markdown(full_text_container[0] + "\u258c", unsafe_allow_html=False)
             last_rendered_length = len(full_text_container[0])
-        time.sleep(SSE_POLL_INTERVAL)
+        done_event.wait(timeout=SSE_POLL_INTERVAL)
 
     fetch_thread.join(timeout=SSE_TIMEOUT_SECONDS)
 

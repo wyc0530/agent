@@ -175,17 +175,20 @@ class LLMProvider:
         messages: list[BaseMessage] = []
         if system_prompt:
             messages.append(SystemMessage(content=system_prompt))
-        for msg in history:
-            content = msg.get("content", "") if isinstance(msg, dict) else (getattr(msg, "content", ""))
-            role = msg.get("role", "user") if isinstance(msg, dict) else getattr(msg, "type", "human")
-            if role not in ("system", "ai", "assistant", "human", "user"):
-                role = "user"
-            if role in ("assistant", "ai"):
-                messages.append(AIMessage(content=content))
-            elif role == "system":
-                continue
-            else:
-                messages.append(HumanMessage(content=content))
+
+        recent_history = history[-6:]
+        if recent_history:
+            history_lines = []
+            for msg in recent_history:
+                content = msg.get("content", "") if isinstance(msg, dict) else (getattr(msg, "content", ""))
+                role = msg.get("role", "user") if isinstance(msg, dict) else getattr(msg, "type", "human")
+                tag = "用户" if role in ("human", "user") else "助手"
+                history_lines.append(f"- [{tag}]: {str(content)[:150]}")
+            history_text = "\n".join(history_lines)
+            messages.append(SystemMessage(
+                content=f"## 对话历史（仅供参考，仅回答最后一条消息）\n{history_text}"
+            ))
+
         messages.append(HumanMessage(content=user_message))
         response = self.invoke(messages)
         return response.content

@@ -71,13 +71,23 @@ def _render_sidebar():
 
 def _render_main_area():
     """渲染主内容区域：标题 + 聊天历史 + 聊天输入框。"""
-    st.title("📚 学习辅助系统")
-    st.caption("AI 驱动的个性化学习助手 | SSE 流式响应")
+    st.markdown('<div id="main-content" role="main">', unsafe_allow_html=True)
+    st.markdown(
+        '<a href="#main-content" class="skip-link" '
+        'style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;'
+        'z-index:999;background:#4a5a7f;color:#fff;padding:8px 16px;border-radius:6px;'
+        'text-decoration:none" '
+        'onfocus="this.style.left=\'8px\';this.style.top=\'8px\';this.style.width=\'auto\';this.style.height=\'auto\'">'
+        '跳至主内容</a>',
+        unsafe_allow_html=True,
+    )
+    st.title("学习辅助系统")
 
     with st.container():
         render_chat_history()
 
     handle_chat_input()
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":

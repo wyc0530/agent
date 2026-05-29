@@ -47,8 +47,9 @@ class BaseAgent(ABC):
         ...
 
     def _chat(self, system_prompt: str, user_message: str, **kwargs: Any) -> str:
+        boundary = "\n\n## 重要\n请仅回答用户的最新问题，基于上下文给出针对性回答。不要重复此前已经解答过的内容。"
         return self._llm.chat(
-            system_prompt=system_prompt,
+            system_prompt=system_prompt + boundary,
             user_message=user_message,
             temperature=kwargs.get("temperature", 0.7),
             max_tokens=kwargs.get("max_tokens", 2048),

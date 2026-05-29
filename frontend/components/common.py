@@ -40,7 +40,7 @@ def show_empty_state(
         message: 纯文本或Markdown格式提示内容。
         custom_html: 可选的自定义HTML内容(用于特殊布局)。
     """
-    st.markdown(f'<div class="empty-state">{custom_html}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="empty-state" role="status">{custom_html}</div>', unsafe_allow_html=True)
     st.markdown(message)
 
 

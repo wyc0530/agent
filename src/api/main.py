@@ -16,7 +16,7 @@ from src.core.memory import VectorStore
 from src.core.retriever import Retriever
 from src.embedding import EmbeddingProvider
 from src.llm import LLMProvider
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 
 _RATE_LIMIT: dict[str, list[float]] = {}
@@ -28,6 +28,12 @@ _AUTH_PATHS = {"/auth/register", "/auth/login"}
 _AUTH_RATE_LIMIT: dict[str, list[float]] = {}
 _AUTH_RATE_WINDOW = 300
 _AUTH_RATE_MAX = 10
+
+
+def reset_rate_limits():
+    """重置所有速率限制器状态（仅供测试使用）。"""
+    _RATE_LIMIT.clear()
+    _AUTH_RATE_LIMIT.clear()
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -125,6 +131,7 @@ class ChatRequest(BaseModel):
     thread_id: str = Field(default="default", description="对话线程ID", max_length=100)
     system_prompt: str = Field(default="", description="系统提示词", max_length=2000)
     agent_role: str = Field(default="", max_length=50, pattern=r"^(planner|expert|partner|quizzer|reviewer|examiner|)$", description="指定Agent角色，留空则自动")
+    history: list[dict[str, str]] = Field(default=[], description="前端最近对话历史（冗余恢复）")
 
 
 class ChatResponse(BaseModel):
@@ -232,9 +239,70 @@ _last_access: dict[str, float] = {}
 _CONV_TTL_SECONDS = 7200
 _CONV_CLEANUP_INTERVAL = 600
 _last_conv_cleanup: float = 0.0
+_CONV_HISTORY_PATH = "data/conversation_history.json"
+
+
+def _load_conversation_history() -> None:
+    global _conversation_history
+    import os as _os
+    try:
+        if _os.path.exists(_CONV_HISTORY_PATH):
+            with open(_CONV_HISTORY_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            loaded = 0
+            for uid, entry in data.items():
+                if isinstance(entry, dict) and "messages" in entry:
+                    _conversation_history[uid] = {
+                        "messages": entry["messages"][-200:],
+                        "created_at": entry.get("created_at", time.time()),
+                    }
+                    loaded += 1
+            if loaded:
+                logger.info(f"对话历史从磁盘恢复 | users={loaded}")
+    except Exception as e:
+        logger.warning(f"对话历史加载失败: {e}")
+
+
+def _save_conversation_history() -> None:
+    import os as _os
+    try:
+        _os.makedirs(_os.path.dirname(_CONV_HISTORY_PATH), exist_ok=True)
+        data = {}
+        for uid, entry in _conversation_history.items():
+            if isinstance(entry, dict) and entry.get("messages"):
+                data[uid] = {
+                    "messages": entry["messages"][-200:],
+                    "created_at": entry.get("created_at", time.time()),
+                }
+        with open(_CONV_HISTORY_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, default=str)
+    except Exception as e:
+        logger.warning(f"对话历史保存失败: {e}")
 
 
 _KNOWN_REPLY_KEYS = ("reply", "answer", "plan_text", "analysis", "ai_recommendation", "exam_guidance")
+
+
+def _format_conversation_context(user_id: str, max_turns: int = 3) -> str:
+    """将对话历史格式化为上下文摘要块，防止 LLM 重复回答历史问题。"""
+    if not user_id:
+        return ""
+    try:
+        history = _conversation_history.get(user_id, {}).get("messages", [])
+        recent = history[-(max_turns * 2):]
+        if not recent:
+            return ""
+        lines = [
+            "## 对话历史（仅供参考，请勿重复回答历史问题）"
+        ]
+        for i, h in enumerate(recent):
+            role_tag = "用户" if h.get("role") == "user" else "助手"
+            content = str(h.get("content", ""))[:150]
+            lines.append(f"{i + 1}. [{role_tag}]: {content}")
+        lines.append("\n请仅回答用户的最新的问题，不要重复回答历史对话中已涉及的内容。")
+        return "\n".join(lines) + "\n\n"
+    except Exception:
+        return ""
 
 
 class CSRFMiddleware(BaseHTTPMiddleware):
@@ -287,9 +355,11 @@ def _extract_reply(result) -> str:
     return result.error if result.error is not None else "Agent 处理完成"
 
 
-def _build_agent_state(message: str, user_id: str) -> dict[str, Any]:
+def _build_agent_state(message: str, user_id: str, frontend_history: Optional[list[dict[str, str]]] = None) -> dict[str, Any]:
     if user_id and user_id not in _conversation_history:
         _conversation_history[user_id] = {"messages": [], "created_at": time.time()}
+        if frontend_history:
+            _conversation_history[user_id]["messages"] = frontend_history[-20:]
     if user_id:
         _last_access[user_id] = time.time()
         _cleanup_stale_conversations()
@@ -297,6 +367,13 @@ def _build_agent_state(message: str, user_id: str) -> dict[str, Any]:
     messages = (entry.get("messages", []) if user_id else []) + [
         {"role": "user", "content": message}
     ]
+
+    _MAX_CONTEXT_BUILD = 60
+    if len(messages) > _MAX_CONTEXT_BUILD:
+        messages = messages[-_MAX_CONTEXT_BUILD:]
+        if user_id and user_id in _conversation_history:
+            _conversation_history[user_id]["messages"] = _conversation_history[user_id]["messages"][-_MAX_CONTEXT_BUILD:]
+
     return {
         "user_id": user_id,
         "user_profile": {},
@@ -339,6 +416,19 @@ def _append_to_history(user_id: str, role: str, content: str) -> None:
     _last_access[user_id] = time.time()
     if len(_conversation_history[user_id]["messages"]) > 500:
         _conversation_history[user_id]["messages"] = _conversation_history[user_id]["messages"][-200:]
+    _maybe_save_history_periodically()
+
+
+_SAVE_COUNTER: int = 0
+_SAVE_THRESHOLD = 20
+
+
+def _maybe_save_history_periodically() -> None:
+    global _SAVE_COUNTER
+    _SAVE_COUNTER += 1
+    if _SAVE_COUNTER >= _SAVE_THRESHOLD:
+        _save_conversation_history()
+        _SAVE_COUNTER = 0
 
 
 def _ensure_agents():
@@ -390,7 +480,7 @@ def _reset_agent_cache():
     logger.info("Agent实例缓存已重置")
 
 
-async def _route_with_agent(message: str, user_id: str, agent_role: str = "", timeout: float = 120.0) -> tuple[str, str]:
+async def _route_with_agent(message: str, user_id: str, agent_role: str = "", timeout: float = 120.0, history: Optional[list[dict[str, str]]] = None) -> tuple[str, str]:
     cache = _ensure_agents()
     supervisor = cache["supervisor"]
     role_map = cache["role_map"]
@@ -399,22 +489,18 @@ async def _route_with_agent(message: str, user_id: str, agent_role: str = "", ti
     if agent_role and agent_role in role_map:
         target_role = role_map[agent_role][0]
 
-    state = _build_agent_state(message, user_id)
+    state = _build_agent_state(message, user_id, history)
 
     try:
-        from src.core.checkpoint import get_summarizer
-        summarizer = get_summarizer()
         msg_list = state.get("messages", [])
-        if summarizer.should_summarize(len(msg_list)):
-            summary_prompt = summarizer.create_summary_prompt(msg_list)
-            state["messages"] = [{"role": "system", "content": f"[对话摘要] {summary_prompt}"}, {"role": "user", "content": message}]
+        _MAX_CONTEXT_MSGS = 50
+        if len(msg_list) > _MAX_CONTEXT_MSGS:
+            state["messages"] = msg_list[-_MAX_CONTEXT_MSGS:]
             if user_id and user_id in _conversation_history:
-                _conversation_history[user_id]["messages"] = [
-                    {"role": "system", "content": f"[对话摘要] {summary_prompt}"}
-                ]
-            logger.info(f"对话已压缩 | original={len(msg_list)} -> compressed")
+                _conversation_history[user_id]["messages"] = _conversation_history[user_id]["messages"][-_MAX_CONTEXT_MSGS:]
+            logger.info(f"对话上下文裁剪 | original={len(msg_list)} cropped={_MAX_CONTEXT_MSGS}")
     except Exception as e:
-        logger.warning(f"对话压缩失败: {e}")
+        logger.warning(f"对话上下文裁剪失败: {e}")
 
     try:
         result = await asyncio.wait_for(
@@ -461,12 +547,15 @@ async def lifespan(app: FastAPI):
     logger.info("学习辅助系统 API 启动中...")
     logger.info(Settings.display())
 
+    _load_conversation_history()
+
     from src.core.tools.base import register_all_tools
     register_all_tools()
     logger.info("全部工具已自动注册")
 
     logger.info("=" * 50)
     yield
+    _save_conversation_history()
     _reset_agent_cache()
     logger.info("学习辅助系统 API 关闭")
 
@@ -557,7 +646,7 @@ async def health_check():
 async def chat(request: ChatRequest):
     try:
         if request.agent_role:
-            reply, agent_role = await _route_with_agent(request.message, request.user_id, request.agent_role)
+            reply, agent_role = await _route_with_agent(request.message, request.user_id, request.agent_role, history=request.history)
             return ChatResponse(response=reply, agent_role=agent_role)
 
         llm = LLMProvider()
@@ -816,21 +905,17 @@ async def chat_stream(request: ChatRequest):
                 if request.agent_role in role_map:
                     target_role = role_map[request.agent_role][0]
 
-                state = _build_agent_state(request.message, request.user_id)
+                state = _build_agent_state(request.message, request.user_id, request.history)
 
                 try:
-                    from src.core.checkpoint import get_summarizer
-                    summarizer = get_summarizer()
                     msg_list = state.get("messages", [])
-                    if summarizer.should_summarize(len(msg_list)):
-                        summary_prompt = summarizer.create_summary_prompt(msg_list)
-                        state["messages"] = [{"role": "system", "content": f"[对话摘要] {summary_prompt}"}, {"role": "user", "content": request.message}]
+                    _MAX_CONTEXT_MSGS = 50
+                    if len(msg_list) > _MAX_CONTEXT_MSGS:
+                        state["messages"] = msg_list[-_MAX_CONTEXT_MSGS:]
                         if request.user_id and request.user_id in _conversation_history:
-                            _conversation_history[request.user_id]["messages"] = [
-                                {"role": "system", "content": f"[对话摘要] {summary_prompt}"}
-                            ]
+                            _conversation_history[request.user_id]["messages"] = _conversation_history[request.user_id]["messages"][-_MAX_CONTEXT_MSGS:]
                 except Exception as e:
-                    logger.warning(f"SSE对话压缩失败: {e}")
+                    logger.warning(f"SSE对话上下文裁剪失败: {e}")
 
                 result = await asyncio.wait_for(
                     asyncio.to_thread(supervisor.run, state, request.message, target_role),
@@ -854,9 +939,16 @@ async def chat_stream(request: ChatRequest):
             else:
                 llm = LLMProvider()
                 model = llm.model
-                messages = []
-                if request.system_prompt:
-                    messages.append(SystemMessage(content=request.system_prompt))
+
+                history_summary = _format_conversation_context(request.user_id, max_turns=2)
+
+                system_content = (
+                    f"{request.system_prompt or '你是一个贴心的学习助手。'}\n\n"
+                    f"{history_summary}"
+                    f"请仅回答用户的最新问题。"
+                )
+
+                messages = [SystemMessage(content=system_content)]
                 messages.append(HumanMessage(content=request.message))
 
                 yield f"data: {json.dumps({'type': 'start', 'agent_role': 'assistant'}, ensure_ascii=False)}\n\n"
