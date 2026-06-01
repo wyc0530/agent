@@ -109,7 +109,7 @@ class PlannerAgent(BaseAgent):
             state_changes["learning_plan"] = {"title": "自动生成学习计划", "raw_response": response, "phases": [], "goals": []}
 
         output = {
-            "plan_text": response,
+            "plan_text": json_text,
             "summary": state_changes["learning_plan"].get("title", message),
             "phases_count": len(state_changes["learning_plan"].get("phases", [])),
         }

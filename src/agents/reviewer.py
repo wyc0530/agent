@@ -81,7 +81,7 @@ JSON格式输出：
             state_changes["weak_points"] = merged_weak
 
             output = {
-                "analysis": response,
+                "analysis": json_text,
                 "error_categories": data.get("error_categories", []),
                 "weak_points_summary": new_weak_points,
                 "review_suggestions": data.get("review_suggestions", []),

@@ -567,6 +567,19 @@ docker run -p 8000:8000 --env-file .env learning-assistant
 - **TTL 清理**：超过 24 小时未活跃的对话自动清理
 - **JSON 序列化**：从 pickle 迁移至 JSON，防止任意代码执行
 
+### SSE 流式输出优化
+
+针对 Agent 切换场景下的流式输出问题，进行了端到端优化：
+
+- **即时 start 事件**：Agent 路径的 SSE 端点现在**立即发送 `start` 事件**（而非等待 Agent 执行完毕），确保前端能第一时间显示响应状态
+- **心跳保活机制**：Agent 执行期间每秒发送 SSE 心跳注释（`: heartbeat\n\n`），防止因长时间无数据导致连接超时/断开
+- **超时保护**：Agent 执行超过 120 秒时自动返回超时错误，避免资源泄漏
+- **前端等待提示**：当 Agent 正在处理但尚未返回内容时，前端显示 `正在等待 {Agent名称} 响应...` 的动态提示，替代之前的空白占位
+
+核心实现位于 [src/api/main.py](src/api/main.py)（`chat_stream` 端点）和 [frontend/components/chat.py](frontend/components/chat.py)（`_render_streaming_output`）。
+
+> **注意**：Agent 路径的 SSE 流式输出的 chunk 粒度是每 50 字符一次，适合文本逐步显示场景。非 Agent 路径（自动模式）使用 LLM 原生 token 级别流式，响应更即时。
+
 ---
 
 ## 安全措施

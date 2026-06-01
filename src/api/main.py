@@ -283,6 +283,197 @@ def _save_conversation_history() -> None:
 _KNOWN_REPLY_KEYS = ("reply", "answer", "plan_text", "analysis", "ai_recommendation", "exam_guidance")
 
 
+def _try_parse_json(text: str) -> Optional[dict[str, Any]]:
+    if not text or not isinstance(text, str):
+        return None
+
+    attempts = [text.strip()]
+
+    if "```json" in text:
+        parts = text.split("```json")
+        if len(parts) >= 2:
+            inner = parts[1].split("```")
+            if inner:
+                attempts.append(inner[0].strip())
+    elif "```" in text:
+        parts = text.split("```")
+        if len(parts) >= 2:
+            attempts.append(parts[1].strip())
+
+    attempt_count = 0
+    for attempt in attempts:
+        attempt_count += 1
+        try:
+            return json.loads(attempt)
+        except (json.JSONDecodeError, ValueError, TypeError):
+            if attempt_count >= len(attempts):
+                start = attempt.find("{")
+                end = attempt.rfind("}")
+                if start >= 0 and end > start:
+                    try:
+                        return json.loads(attempt[start:end + 1])
+                    except (json.JSONDecodeError, ValueError, TypeError):
+                        pass
+    return None
+
+
+def _format_planner_output(output: dict[str, Any]) -> str:
+    plan_text = output.get("plan_text", "")
+    if not plan_text or not isinstance(plan_text, str):
+        return plan_text
+
+    data = _try_parse_json(plan_text)
+    if not data:
+        return plan_text
+
+    lines = []
+    title = data.get("title", "学习计划")
+    lines.append(f"## {title}")
+    lines.append("")
+
+    goals = data.get("goals", [])
+    if goals:
+        lines.append("### 学习目标")
+        for g in goals:
+            if isinstance(g, dict):
+                g_title = g.get("title", "")
+                g_desc = g.get("description", "")
+                g_date = g.get("target_date", "")
+                g_priority = g.get("priority", "")
+                priority_icon = "🔴" if g_priority == "high" else "🟡" if g_priority == "medium" else "🟢"
+                lines.append(f"- {priority_icon} **{g_title}**")
+                if g_desc:
+                    lines.append(f"  {g_desc}")
+                if g_date:
+                    lines.append(f"  目标日期: {g_date}")
+        lines.append("")
+
+    phases = data.get("phases", [])
+    if phases:
+        lines.append("### 学习阶段")
+        for p in phases:
+            if isinstance(p, dict):
+                p_title = p.get("title", "")
+                p_desc = p.get("description", "")
+                p_days = p.get("duration_days", 0)
+                p_topics = p.get("topics", [])
+                lines.append(f"#### {p_title}")
+                if p_desc:
+                    lines.append(f"_{p_desc}_")
+                if p_days:
+                    lines.append(f"预计时长: {p_days} 天")
+                if p_topics:
+                    for t in p_topics:
+                        lines.append(f"- {t}")
+                lines.append("")
+
+    return "\n".join(lines)
+
+
+def _format_reviewer_output(output: dict[str, Any]) -> str:
+    analysis = output.get("analysis", "")
+    if not analysis or not isinstance(analysis, str):
+        return analysis
+
+    data = _try_parse_json(analysis)
+    if not data:
+        return analysis
+
+    lines = []
+    lines.append("## 学习复习分析")
+    lines.append("")
+
+    error_categories = data.get("error_categories", [])
+    if error_categories:
+        lines.append("### 错误分类")
+        for cat in error_categories:
+            if isinstance(cat, dict):
+                cat_type = cat.get("type", "")
+                cat_count = cat.get("count", 0)
+                cat_kps = cat.get("knowledge_points", [])
+                lines.append(f"- **{cat_type}** ({cat_count}次): {', '.join(str(k) for k in cat_kps)}")
+        lines.append("")
+
+    weak_summary = data.get("weak_points_summary", [])
+    if weak_summary:
+        lines.append("### 薄弱知识点")
+        for w in weak_summary:
+            lines.append(f"- {w}")
+        lines.append("")
+
+    suggestions = data.get("review_suggestions", [])
+    if suggestions:
+        lines.append("### 复习建议")
+        for s in suggestions:
+            if isinstance(s, dict):
+                kp = s.get("knowledge_point", "")
+                method = s.get("method", "")
+                lines.append(f"- **{kp}**: {method}")
+            elif isinstance(s, str):
+                lines.append(f"- {s}")
+        lines.append("")
+
+    feedback = data.get("feedback_for_planner", "")
+    if feedback:
+        lines.append(f"### 学习计划调整建议\n{feedback}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def _format_quizzer_output(output: dict[str, Any]) -> str:
+    lines = []
+    difficulty = output.get("difficulty", 0.5)
+    strategy = output.get("strategy", "")
+
+    if strategy:
+        lines.append(f"## {strategy}")
+        lines.append(f"难度系数: {difficulty:.0%}")
+    else:
+        lines.append("## 测验题目")
+    lines.append("")
+
+    questions = output.get("questions", [])
+    if questions:
+        for i, q in enumerate(questions, 1):
+            if isinstance(q, dict):
+                q_text = q.get("question", q.get("title", str(q)))
+                q_options = q.get("options", [])
+                q_type = q.get("type", "")
+                lines.append(f"### 第{i}题")
+                if q_type:
+                    lines.append(f"题型: {q_type}")
+                lines.append(f"{q_text}")
+                if q_options:
+                    for j, opt in enumerate(q_options):
+                        if isinstance(opt, dict):
+                            label = opt.get("label", chr(65 + j))
+                            text = opt.get("text", str(opt))
+                            lines.append(f"- {label}. {text}")
+                        else:
+                            lines.append(f"- {chr(65 + j)}. {opt}")
+                lines.append("")
+
+    assessment = output.get("assessment", {})
+    if isinstance(assessment, dict) and assessment:
+        lines.append("### 能力评估")
+        level = assessment.get("level", assessment.get("overall", ""))
+        if level:
+            lines.append(f"综合水平: {level}")
+        strengths = assessment.get("strengths", [])
+        if strengths:
+            lines.append(f"优势: {', '.join(str(s) for s in strengths)}")
+        weaknesses = assessment.get("weaknesses", [])
+        if weaknesses:
+            lines.append(f"待加强: {', '.join(str(w) for w in weaknesses)}")
+        lines.append("")
+
+    if not questions:
+        lines.append("暂无题目生成，请稍后重试。")
+
+    return "\n".join(lines)
+
+
 def _format_conversation_context(user_id: str, max_turns: int = 3) -> str:
     """将对话历史格式化为上下文摘要块，防止 LLM 重复回答历史问题。"""
     if not user_id:
@@ -345,14 +536,37 @@ class CSRFMiddleware(BaseHTTPMiddleware):
 
 
 def _extract_reply(result) -> str:
+    if not result.output:
+        return result.error if result.error is not None else "Agent 处理完成"
+
+    agent_role = getattr(result, "agent_role", None)
+    if agent_role:
+        role_str = agent_role.value if hasattr(agent_role, "value") else str(agent_role)
+        if role_str == "planner":
+            return _format_planner_output(result.output)
+        if role_str == "reviewer":
+            return _format_reviewer_output(result.output)
+        if role_str == "quizzer":
+            return _format_quizzer_output(result.output)
+
+    for key in _KNOWN_REPLY_KEYS:
+        val = result.output.get(key)
+        if val and isinstance(val, str) and len(val) > 1:
+            return val
+
     if result.output:
-        for key in _KNOWN_REPLY_KEYS:
-            val = result.output.get(key)
-            if val and isinstance(val, str) and len(val) > 1:
-                return val
-        if result.output:
-            return json.dumps(result.output, ensure_ascii=False, default=str)
-    return result.error if result.error is not None else "Agent 处理完成"
+        formatted = _format_planner_output(result.output)
+        if formatted and formatted != result.output.get("plan_text", ""):
+            return formatted
+        formatted = _format_reviewer_output(result.output)
+        if formatted and formatted != result.output.get("analysis", ""):
+            return formatted
+        formatted = _format_quizzer_output(result.output)
+        if formatted and formatted != "## 测验题目\n\n暂无题目生成，请稍后重试。":
+            return formatted
+        return json.dumps(result.output, ensure_ascii=False, default=str, indent=2)
+
+    return "Agent 处理完成"
 
 
 def _build_agent_state(message: str, user_id: str, frontend_history: Optional[list[dict[str, str]]] = None) -> dict[str, Any]:
@@ -917,19 +1131,31 @@ async def chat_stream(request: ChatRequest):
                 except Exception as e:
                     logger.warning(f"SSE对话上下文裁剪失败: {e}")
 
-                result = await asyncio.wait_for(
-                    asyncio.to_thread(supervisor.run, state, request.message, target_role),
-                    timeout=120,
-                )
+                yield f"data: {json.dumps({'type': 'start', 'agent_role': request.agent_role}, ensure_ascii=False)}\n\n"
+                await asyncio.sleep(0)
+
+                loop = asyncio.get_running_loop()
+                agent_task = loop.run_in_executor(None, supervisor.run, state, request.message, target_role)
+
+                _AGENT_TIMEOUT = 120.0
+                _start_ts = time.time()
+                while True:
+                    try:
+                        await asyncio.wait_for(asyncio.shield(agent_task), timeout=1.0)
+                        break
+                    except asyncio.TimeoutError:
+                        if time.time() - _start_ts > _AGENT_TIMEOUT:
+                            yield f"data: {json.dumps({'type': 'error', 'content': 'Agent 处理超时，请稍后重试'}, ensure_ascii=False)}\n\n"
+                            return
+                        yield f": heartbeat\n\n"
+
+                result = await agent_task
 
                 reply = _extract_reply(result)
                 agent_role = result.agent_role.value
 
                 _append_to_history(request.user_id, "user", request.message)
                 _append_to_history(request.user_id, "assistant", reply)
-
-                yield f"data: {json.dumps({'type': 'start', 'agent_role': agent_role}, ensure_ascii=False)}\n\n"
-                await asyncio.sleep(0)
 
                 chunk_size = 50
                 for i in range(0, len(reply), chunk_size):

@@ -19,6 +19,7 @@ from config import (
     MESSAGE_AGENT_LABEL,
     MESSAGE_TIMEOUT,
     MESSAGE_ERROR_PREFIX,
+    AGENT_ROLE_LABELS,
 )
 from components.common import display_error, show_empty_state
 
@@ -118,7 +119,7 @@ def stream_chat(
     fetch_thread = threading.Thread(target=_fetch_stream, daemon=True)
     fetch_thread.start()
 
-    _render_streaming_output(placeholder, done, full_text_container, fetch_thread)
+    _render_streaming_output(placeholder, done, full_text_container, fetch_thread, agent_role)
 
     _finalize_chat_message(full_text_container[0], agent_role_container[0], error_message[0])
 
@@ -128,6 +129,7 @@ def _render_streaming_output(
     done_event: threading.Event,
     full_text_container: list[str],
     fetch_thread: threading.Thread,
+    agent_role: str = "",
 ):
     """渲染流式输出，逐字显示AI回复并带光标动画。
 
@@ -136,12 +138,16 @@ def _render_streaming_output(
         done_event: 标识流式请求是否完成的事件。
         full_text_container: 可变容器，子线程实时更新 [0] 索引的文本内容。
         fetch_thread: 数据获取子线程。
+        agent_role: 当前指定的Agent角色（用于显示等待提示）。
     """
     last_rendered_length = 0
     while not done_event.is_set() or len(full_text_container[0]) > last_rendered_length:
         if len(full_text_container[0]) > last_rendered_length:
             placeholder.markdown(full_text_container[0] + "\u258c", unsafe_allow_html=False)
             last_rendered_length = len(full_text_container[0])
+        else:
+            agent_label = AGENT_ROLE_LABELS.get(agent_role, "助手")
+            placeholder.markdown(f"*正在等待 {agent_label} 响应...* \u258c", unsafe_allow_html=False)
         done_event.wait(timeout=SSE_POLL_INTERVAL)
 
     fetch_thread.join(timeout=SSE_TIMEOUT_SECONDS)
