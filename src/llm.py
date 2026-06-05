@@ -86,17 +86,30 @@ class LLMProvider:
         if model is None:
             raise RuntimeError("没有可用的LLM模型")
 
-        try:
-            result = model.invoke(messages, **kwargs)
-            if isinstance(result, BaseMessage):
-                return result
-            return AIMessage(content=str(result))
-        except Exception as e:
-            logger.error(f"LLM调用失败: {e}")
-            if use_local or self._local_model is None:
+        last_error: Optional[Exception] = None
+        for attempt in range(3):
+            try:
+                result = model.invoke(messages, **kwargs)
+                if isinstance(result, BaseMessage):
+                    return result
+                return AIMessage(content=str(result))
+            except Exception as e:
+                last_error = e
+                err_str = str(e).lower()
+                if "null" in err_str and "choices" in err_str:
+                    logger.warning(
+                        "LLM 返回空响应 (choices=null)，准备重试 "
+                        f"| attempt={attempt + 1}/3"
+                    )
+                    if attempt < 2:
+                        time.sleep(1.5 * (attempt + 1))
+                        continue
+                    raise RuntimeError(
+                        "LLM 多次返回空响应，请检查 API 配额或稍后重试"
+                    ) from e
                 raise
-            logger.info("API调用失败，尝试使用本地模型")
-            return self.invoke(messages, use_local=True)
+
+        raise RuntimeError(f"LLM 调用失败: {last_error}")
 
     async def ainvoke(
         self,
@@ -171,6 +184,8 @@ class LLMProvider:
         user_message: str,
         history: list[BaseMessage],
         system_prompt: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
     ) -> str:
         messages: list[BaseMessage] = []
         if system_prompt:
@@ -190,7 +205,7 @@ class LLMProvider:
             ))
 
         messages.append(HumanMessage(content=user_message))
-        response = self.invoke(messages)
+        response = self.invoke(messages, temperature=temperature, max_tokens=max_tokens)
         return response.content
 
     def check_health(self) -> dict[str, Any]:

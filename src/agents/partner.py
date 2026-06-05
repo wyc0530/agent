@@ -45,6 +45,7 @@ class PartnerAgent(BaseAgent):
         user_msg = message or "你好，我有一个问题想请教"
 
         state_changes: dict[str, Any] = {"current_agent": self.role}
+        history = self._extract_history(state)
 
         rag_context: list[dict[str, Any]] = []
         rag_text = ""
@@ -75,7 +76,7 @@ class PartnerAgent(BaseAgent):
         except (AttributeError, ValueError, RuntimeError, OSError) as e:
             logger.debug(f"计时器启动失败: {e}")
 
-        response = self._chat(system_prompt, user_msg, temperature=0.8, max_tokens=1536)
+        response = self._chat(system_prompt, user_msg, history=history, temperature=0.8, max_tokens=1536)
 
         try:
             stopped = self._timer.stop_session()

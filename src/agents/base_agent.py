@@ -47,13 +47,92 @@ class BaseAgent(ABC):
         ...
 
     def _chat(self, system_prompt: str, user_message: str, **kwargs: Any) -> str:
-        boundary = "\n\n## 重要\n请仅回答用户的最新问题，基于上下文给出针对性回答。不要重复此前已经解答过的内容。"
-        return self._llm.chat(
-            system_prompt=system_prompt + boundary,
-            user_message=user_message,
-            temperature=kwargs.get("temperature", 0.7),
-            max_tokens=kwargs.get("max_tokens", 2048),
+        boundary = (
+            "\n\n## 重要\n请仅回答用户的最新问题，基于上下文给出针对性回答。"
+            "不要重复此前已经解答过的内容。"
         )
+        full_prompt = system_prompt + boundary
+        history = kwargs.pop("history", None)
+
+        temperature = kwargs.get("temperature", 0.7)
+        max_tokens = kwargs.get("max_tokens", 2048)
+
+        try:
+            if history:
+                return self._llm.chat_with_history(
+                    user_message=user_message,
+                    history=history,
+                    system_prompt=full_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            return self._llm.chat(
+                system_prompt=full_prompt,
+                user_message=user_message,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        except Exception as e:
+            logger.warning(
+                f"Agent LLM 调用失败，尝试回退 | role={self.role.value} err={e}"
+            )
+            try:
+                if history:
+                    return self._llm.chat_with_history(
+                        user_message=user_message,
+                        history=history,
+                        system_prompt=full_prompt,
+                        temperature=0.7,
+                        max_tokens=1024,
+                    )
+                return self._llm.chat(
+                    system_prompt=full_prompt,
+                    user_message=user_message,
+                    temperature=0.7,
+                    max_tokens=1024,
+                )
+            except Exception as e2:
+                logger.error(
+                    f"Agent LLM 回退调用也失败 | role={self.role.value} err={e2}"
+                )
+                raise RuntimeError(
+                    f"Agent [{self.role.value}] LLM 调用失败，请稍后重试"
+                ) from e2
+
+    @staticmethod
+    def _extract_history(state: LearningState, max_turns: int = 6) -> list[dict[str, str]]:
+        messages = state.get("messages") or []
+        if not messages:
+            return []
+        return messages[-(max_turns * 2):]
+
+    @staticmethod
+    def _retrieve_context(query: str, user_id: str = "", top_k: int = 3) -> str:
+        try:
+            from src.core.memory import VectorStore
+            store = VectorStore()
+            filter_meta = {}
+            if user_id:
+                filter_meta["user_id"] = user_id
+            results = store.search(
+                query=query,
+                top_k=top_k,
+                filter_metadata=filter_meta if filter_meta else None,
+            )
+            if not results:
+                return ""
+            parts = []
+            for i, doc in enumerate(results, 1):
+                content = doc.get("content", "") or doc.get("_text", "")
+                score = doc.get("score", 0.0)
+                if score < 0.3:
+                    continue
+                content_short = content[:200]
+                parts.append(f"[RAG-{i}] (相关度: {score:.2f})\n{content_short}")
+            return "\n\n".join(parts) if parts else ""
+        except Exception as e:
+            logger.debug(f"RAG 上下文检索跳过: {e}")
+            return ""
 
     def _safe_run(self, state: LearningState, message: str, runner) -> AgentResult:
         start = time.perf_counter()

@@ -7,6 +7,14 @@ from src.core.state import AgentRole, LearningPlan, LearningState
 from src.core.tools.timer import FocusTimer
 from src.core.graph import get_graph_store
 
+_FALLBACK_PLANNER_TEXT = (
+    "抱歉，学习规划师当前无法生成学习计划（LLM 服务暂时不可用）。\n\n"
+    "建议：\n"
+    "- 请稍后重试\n"
+    "- 检查 API 密钥是否有效\n"
+    "- 检查网络连接是否正常\n"
+)
+
 
 class PlannerAgent(BaseAgent):
     role = AgentRole.PLANNER
@@ -96,9 +104,26 @@ class PlannerAgent(BaseAgent):
     def _run_impl(self, state: LearningState, message: str) -> AgentResult:
         system_prompt = self._build_system_prompt(state)
         user_msg = message or "请根据我的当前情况生成一个详细的学习计划"
-        response = self._chat(system_prompt, user_msg, temperature=0.6, max_tokens=2048)
 
         state_changes: dict[str, Any] = {"current_agent": self.role}
+        history = self._extract_history(state)
+
+        try:
+            response = self._chat(system_prompt, user_msg, history=history, temperature=0.6, max_tokens=2048)
+        except Exception as e:
+            logger.error(f"PlannerAgent LLM 调用完全失败: {e}")
+            return AgentResult(
+                agent_role=self.role,
+                output={
+                    "plan_text": _FALLBACK_PLANNER_TEXT,
+                    "summary": "学习计划生成失败",
+                    "phases_count": 0,
+                },
+                state_changes=state_changes,
+                success=False,
+                error=f"LLM 调用失败: {e}",
+            )
+
         try:
             json_text = self._extract_json(response)
             data = json.loads(json_text.strip())
@@ -106,6 +131,7 @@ class PlannerAgent(BaseAgent):
             state_changes["learning_plan"] = plan.model_dump()
         except (json.JSONDecodeError, ValueError, TypeError, KeyError) as e:
             logger.warning(f"学习计划JSON解析失败，使用原始响应: {e}")
+            json_text = response
             state_changes["learning_plan"] = {"title": "自动生成学习计划", "raw_response": response, "phases": [], "goals": []}
 
         output = {

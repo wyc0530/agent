@@ -5,6 +5,13 @@ from src.agents.base_agent import AgentResult, BaseAgent
 from src.config import logger
 from src.core.state import AgentRole, LearningState
 
+_FALLBACK_REVIEWER_TEXT = (
+    "抱歉，复习整理专家当前无法生成分析报告（LLM 服务暂时不可用）。\n\n"
+    "建议：\n"
+    "- 请稍后重试\n"
+    "- 检查 API 密钥是否有效\n"
+)
+
 
 class ReviewerAgent(BaseAgent):
     role = AgentRole.REVIEWER
@@ -54,9 +61,27 @@ JSON格式输出：
     def _run_impl(self, state: LearningState, message: str) -> AgentResult:
         system_prompt = self._build_system_prompt(state)
         user_msg = message or "请分析我的错题记录，整理薄弱知识点"
-        response = self._chat(system_prompt, user_msg, temperature=0.5, max_tokens=2048)
 
         state_changes: dict[str, Any] = {"current_agent": self.role}
+        history = self._extract_history(state)
+
+        try:
+            response = self._chat(system_prompt, user_msg, history=history, temperature=0.5, max_tokens=2048)
+        except Exception as e:
+            logger.error(f"ReviewerAgent LLM 调用完全失败: {e}")
+            return AgentResult(
+                agent_role=self.role,
+                output={
+                    "analysis": _FALLBACK_REVIEWER_TEXT,
+                    "error_categories": [],
+                    "weak_points_summary": [],
+                    "review_suggestions": [],
+                    "feedback_for_planner": "",
+                },
+                state_changes=state_changes,
+                success=False,
+                error=f"LLM 调用失败: {e}",
+            )
 
         try:
             json_text = self._extract_json(response)

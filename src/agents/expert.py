@@ -53,7 +53,8 @@ class ExpertAgent(BaseAgent):
     def _run_impl(self, state: LearningState, message: str) -> AgentResult:
         system_prompt = self._build_system_prompt(state)
         user_msg = message or "请推荐当前阶段的学习资料"
-        response = self._chat(system_prompt, user_msg, temperature=0.7, max_tokens=2048)
+        history = self._extract_history(state)
+        response = self._chat(system_prompt, user_msg, history=history, temperature=0.7, max_tokens=2048)
 
         state_changes: dict[str, Any] = {"current_agent": self.role}
 
