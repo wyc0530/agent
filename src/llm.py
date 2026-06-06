@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import Any, Optional
+from typing import Any, AsyncGenerator, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
@@ -165,6 +165,76 @@ class LLMProvider:
         messages.append(HumanMessage(content=user_message))
         response = self.invoke(messages, use_local=use_local, temperature=temperature, max_tokens=max_tokens)
         return response.content
+
+    async def stream_chat(
+        self,
+        user_message: str,
+        system_prompt: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
+    ) -> AsyncGenerator[str, None]:
+        """流式对话，逐 token 返回 LLM 生成内容。
+
+        Args:
+            user_message: 用户消息。
+            system_prompt: 系统提示词。
+            temperature: 温度参数。
+            max_tokens: 最大 token 数。
+
+        Yields:
+            每次 yield 一个 token 片段。
+        """
+        messages: list[BaseMessage] = []
+        if system_prompt:
+            messages.append(SystemMessage(content=system_prompt))
+        messages.append(HumanMessage(content=user_message))
+        async for chunk in self._model.astream(messages, temperature=temperature, max_tokens=max_tokens):
+            content = chunk.content if hasattr(chunk, "content") and isinstance(chunk.content, str) else ""
+            if content:
+                yield content
+
+    async def stream_chat_with_history(
+        self,
+        user_message: str,
+        history: list[BaseMessage],
+        system_prompt: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
+    ) -> AsyncGenerator[str, None]:
+        """带历史记录的流式对话，逐 token 返回 LLM 生成内容。
+
+        Args:
+            user_message: 用户消息。
+            history: 历史消息列表。
+            system_prompt: 系统提示词。
+            temperature: 温度参数。
+            max_tokens: 最大 token 数。
+
+        Yields:
+            每次 yield 一个 token 片段。
+        """
+        messages: list[BaseMessage] = []
+        if system_prompt:
+            messages.append(SystemMessage(content=system_prompt))
+
+        recent_history = history[-6:]
+        if recent_history:
+            history_lines = []
+            for msg in recent_history:
+                content = msg.get("content", "") if isinstance(msg, dict) else (getattr(msg, "content", ""))
+                role = msg.get("role", "user") if isinstance(msg, dict) else getattr(msg, "type", "human")
+                tag = "用户" if role in ("human", "user") else "助手"
+                history_lines.append(f"- [{tag}]: {str(content)[:150]}")
+            history_text = "\n".join(history_lines)
+            messages.append(SystemMessage(
+                content=f"## 对话历史（仅供参考，仅回答最后一条消息）\n{history_text}"
+            ))
+
+        messages.append(HumanMessage(content=user_message))
+        async for chunk in self._model.astream(messages, temperature=temperature, max_tokens=max_tokens):
+            content = chunk.content if hasattr(chunk, "content") and isinstance(chunk.content, str) else ""
+            if content:
+                yield content
 
     async def achat(
         self,

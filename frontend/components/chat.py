@@ -121,7 +121,7 @@ def stream_chat(
 
     _render_streaming_output(placeholder, done, full_text_container, fetch_thread, agent_role)
 
-    _finalize_chat_message(full_text_container[0], agent_role_container[0], error_message[0])
+    _finalize_chat_message(placeholder, full_text_container[0], agent_role_container[0], error_message[0])
 
 
 def _render_streaming_output(
@@ -133,6 +133,10 @@ def _render_streaming_output(
 ):
     """渲染流式输出，逐字显示AI回复并带光标动画。
 
+    仅在没有任何内容到达时显示"正在等待..."提示，
+    一旦首个内容块到达，将始终渲染已累积的内容，不再回退到等待提示，
+    从而避免流式内容与提示文字交替显示造成的视觉闪动。
+
     Args:
         placeholder: Streamlit 空占位符，用于实时更新内容。
         done_event: 标识流式请求是否完成的事件。
@@ -141,26 +145,42 @@ def _render_streaming_output(
         agent_role: 当前指定的Agent角色（用于显示等待提示）。
     """
     last_rendered_length = 0
+    content_started = False
+    agent_label = AGENT_ROLE_LABELS.get(agent_role, "助手")
+
     while not done_event.is_set() or len(full_text_container[0]) > last_rendered_length:
-        if len(full_text_container[0]) > last_rendered_length:
-            placeholder.markdown(full_text_container[0] + "\u258c", unsafe_allow_html=False)
-            last_rendered_length = len(full_text_container[0])
+        current_text = full_text_container[0]
+        current_length = len(current_text)
+
+        if current_length > 0:
+            content_started = True
+        if current_length > last_rendered_length:
+            last_rendered_length = current_length
+
+        if content_started:
+            # 内容已开始流式输出：始终渲染当前内容，防止回退到等待提示
+            placeholder.markdown(current_text + "\u258c", unsafe_allow_html=False)
         else:
-            agent_label = AGENT_ROLE_LABELS.get(agent_role, "助手")
             placeholder.markdown(f"*正在等待 {agent_label} 响应...* \u258c", unsafe_allow_html=False)
+
         done_event.wait(timeout=SSE_POLL_INTERVAL)
 
     fetch_thread.join(timeout=SSE_TIMEOUT_SECONDS)
 
 
 def _finalize_chat_message(
+    placeholder,
     full_text: str,
     agent_role_text: str,
     error: Optional[str],
 ):
     """完成聊天消息的最后渲染和存储。
 
+    先清除占位符中的流式光标，渲染最终内容（无光标），
+    再追加到会话历史，避免在页面重渲染前出现光标残留。
+
     Args:
+        placeholder: 流式输出使用的 Streamlit 占位符。
         full_text: 完整的AI回复文本。
         agent_role_text: 实际处理消息的Agent角色名称。
         error: 错误消息文本（无错误时为None）。
@@ -173,6 +193,7 @@ def _finalize_chat_message(
         if not full_text.strip():
             full_text = MESSAGE_TIMEOUT
             display_error(full_text)
+        placeholder.empty()
         _append_assistant_message(full_text, agent_role_text)
 
 

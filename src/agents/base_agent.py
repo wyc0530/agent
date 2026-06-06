@@ -99,6 +99,33 @@ class BaseAgent(ABC):
                     f"Agent [{self.role.value}] LLM 调用失败，请稍后重试"
                 ) from e2
 
+    def _build_stream_context(
+        self, state: LearningState, message: str, **kwargs: Any
+    ) -> tuple[str, str, list[dict[str, str]], float, int]:
+        """构建流式对话所需的上下文，不调用 LLM。
+
+        用于 SSE 流式端点获取 Agent 的 system prompt 和历史记录，
+        然后由 API 层使用 LLM 的 astream 进行真正的逐 token 流式输出。
+
+        Args:
+            state: 当前学习状态。
+            message: 用户消息。
+            **kwargs: 额外参数（temperature, max_tokens 等）。
+
+        Returns:
+            (system_prompt, user_message, history, temperature, max_tokens)
+        """
+        system_prompt = self._build_system_prompt(state)
+        boundary = (
+            "\n\n## 重要\n请仅回答用户的最新问题，基于上下文给出针对性回答。"
+            "不要重复此前已经解答过的内容。"
+        )
+        full_prompt = system_prompt + boundary
+        history = self._extract_history(state)
+        temperature = kwargs.get("temperature", 0.7)
+        max_tokens = kwargs.get("max_tokens", 2048)
+        return full_prompt, message, history, temperature, max_tokens
+
     @staticmethod
     def _extract_history(state: LearningState, max_turns: int = 6) -> list[dict[str, str]]:
         messages = state.get("messages") or []

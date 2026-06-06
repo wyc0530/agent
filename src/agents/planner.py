@@ -1,9 +1,8 @@
-import json
 from typing import Any
 
 from src.agents.base_agent import AgentResult, BaseAgent
 from src.config import logger
-from src.core.state import AgentRole, LearningPlan, LearningState
+from src.core.state import AgentRole, LearningState
 from src.core.tools.timer import FocusTimer
 from src.core.graph import get_graph_store
 
@@ -83,20 +82,15 @@ class PlannerAgent(BaseAgent):
 
 {graph_context}
 ## 输出要求
-根据用户消息中的指令生成对应的学习方案。以JSON格式输出以下结构：
-```json
-{{
-    "plan_id": "auto-generated",
-    "title": "学习计划标题",
-    "goals": [
-        {{"title": "掌握基础", "description": "掌握核心概念", "target_date": "2026-07-01", "priority": "high", "status": "pending"}}
-    ],
-    "phases": [
-        {{"title": "基础入门", "description": "了解核心概念和基本语法", "topics": ["变量", "循环"], "duration_days": 14, "order": 1}}
-    ]
-}}
-```
-确保阶段之间有清晰的递进关系（order从小到大），从基础到进阶。"""
+根据用户消息中的指令生成对应的学习方案。请以自然语言文本格式输出，使用清晰的标题、段落和列表结构，使内容易于阅读。
+
+输出应包含以下内容：
+1. **学习计划标题** - 概括整体方向
+2. **学习目标** - 列出2-4个具体目标，包含优先级和预计完成时间
+3. **学习阶段** - 分阶段描述学习路径，每个阶段包含主题、描述和预计时长
+4. **建议作息** - 根据用户可用时间给出每日/每周学习建议
+
+使用Markdown格式组织内容，确保从基础到进阶的递进关系清晰。"""
 
     def run(self, state: LearningState, message: str = "") -> AgentResult:
         return self._safe_run(state, message, self._run_impl)
@@ -124,23 +118,15 @@ class PlannerAgent(BaseAgent):
                 error=f"LLM 调用失败: {e}",
             )
 
-        try:
-            json_text = self._extract_json(response)
-            data = json.loads(json_text.strip())
-            plan = LearningPlan(**data)
-            state_changes["learning_plan"] = plan.model_dump()
-        except (json.JSONDecodeError, ValueError, TypeError, KeyError) as e:
-            logger.warning(f"学习计划JSON解析失败，使用原始响应: {e}")
-            json_text = response
-            state_changes["learning_plan"] = {"title": "自动生成学习计划", "raw_response": response, "phases": [], "goals": []}
+        state_changes["learning_plan"] = {"title": "学习计划", "raw_response": response, "phases": [], "goals": []}
 
         output = {
-            "plan_text": json_text,
-            "summary": state_changes["learning_plan"].get("title", message),
-            "phases_count": len(state_changes["learning_plan"].get("phases", [])),
+            "plan_text": response,
+            "summary": "学习计划",
+            "phases_count": 0,
         }
 
-        logger.info(f"PlannerAgent 完成 | phases={output['phases_count']}")
+        logger.info(f"PlannerAgent 完成")
         return AgentResult(
             agent_role=self.role,
             output=output,

@@ -1134,34 +1134,59 @@ async def chat_stream(request: ChatRequest):
                 yield f"data: {json.dumps({'type': 'start', 'agent_role': request.agent_role}, ensure_ascii=False)}\n\n"
                 await asyncio.sleep(0)
 
-                loop = asyncio.get_running_loop()
-                agent_task = loop.run_in_executor(None, supervisor.run, state, request.message, target_role)
+                # 使用 Agent 的 system prompt 和历史记录，通过 LLM 进行真正的流式输出
+                agent = supervisor._agents.get(target_role) if target_role else None
+                full_reply = ""
 
-                _AGENT_TIMEOUT = 120.0
-                _start_ts = time.time()
-                while True:
+                if agent:
                     try:
-                        await asyncio.wait_for(asyncio.shield(agent_task), timeout=1.0)
-                        break
-                    except asyncio.TimeoutError:
-                        if time.time() - _start_ts > _AGENT_TIMEOUT:
-                            yield f"data: {json.dumps({'type': 'error', 'content': 'Agent 处理超时，请稍后重试'}, ensure_ascii=False)}\n\n"
-                            return
-                        yield f": heartbeat\n\n"
-
-                result = await agent_task
-
-                reply = _extract_reply(result)
-                agent_role = result.agent_role.value
+                        system_prompt, user_msg, history, temperature, max_tokens = agent._build_stream_context(
+                            state, request.message
+                        )
+                        llm = LLMProvider()
+                        if history:
+                            async for chunk in llm.stream_chat_with_history(
+                                user_msg, history, system_prompt, temperature, max_tokens
+                            ):
+                                full_reply += chunk
+                                yield f"data: {json.dumps({'type': 'chunk', 'content': chunk}, ensure_ascii=False)}\n\n"
+                        else:
+                            async for chunk in llm.stream_chat(
+                                user_msg, system_prompt, temperature, max_tokens
+                            ):
+                                full_reply += chunk
+                                yield f"data: {json.dumps({'type': 'chunk', 'content': chunk}, ensure_ascii=False)}\n\n"
+                    except Exception as e:
+                        logger.warning(f"Agent 流式输出失败，回退到同步模式 | role={request.agent_role} err={e}")
+                        # 回退：使用同步 agent 调用 + 分块输出
+                        loop = asyncio.get_running_loop()
+                        result = await loop.run_in_executor(None, supervisor.run, state, request.message, target_role)
+                        full_reply = _extract_reply(result)
+                        chunk_size = 50
+                        for i in range(0, len(full_reply), chunk_size):
+                            chunk_text = full_reply[i:i + chunk_size]
+                            yield f"data: {json.dumps({'type': 'chunk', 'content': chunk_text}, ensure_ascii=False)}\n\n"
+                            await asyncio.sleep(0.02)
+                else:
+                    # 未找到对应 Agent，使用 assistant 流式输出
+                    llm = LLMProvider()
+                    model = llm.model
+                    history_summary = _format_conversation_context(request.user_id, max_turns=2)
+                    system_content = (
+                        f"{request.system_prompt or '你是一个贴心的学习助手。'}\n\n"
+                        f"{history_summary}"
+                        f"请仅回答用户的最新问题。"
+                    )
+                    messages = [SystemMessage(content=system_content)]
+                    messages.append(HumanMessage(content=request.message))
+                    async for chunk in model.astream(messages):
+                        content = chunk.content if hasattr(chunk, "content") and isinstance(chunk.content, str) else ""
+                        if content:
+                            full_reply += content
+                            yield f"data: {json.dumps({'type': 'chunk', 'content': content}, ensure_ascii=False)}\n\n"
 
                 _append_to_history(request.user_id, "user", request.message)
-                _append_to_history(request.user_id, "assistant", reply)
-
-                chunk_size = 50
-                for i in range(0, len(reply), chunk_size):
-                    chunk = reply[i:i + chunk_size]
-                    yield f"data: {json.dumps({'type': 'chunk', 'content': chunk}, ensure_ascii=False)}\n\n"
-                    await asyncio.sleep(0.02)
+                _append_to_history(request.user_id, "assistant", full_reply)
             else:
                 llm = LLMProvider()
                 model = llm.model
