@@ -129,6 +129,7 @@ class ChatRequest(BaseModel):
     message: str = Field(description="用户消息", min_length=1, max_length=5000)
     user_id: str = Field(default="default", description="用户ID", max_length=100)
     thread_id: str = Field(default="default", description="对话线程ID", max_length=100)
+    conversation_id: str = Field(default="", description="对话ID", max_length=100)
     system_prompt: str = Field(default="", description="系统提示词", max_length=2000)
     agent_role: str = Field(default="", max_length=50, pattern=r"^(planner|expert|partner|quizzer|reviewer|examiner|)$", description="指定Agent角色，留空则自动")
     history: list[dict[str, str]] = Field(default=[], description="前端最近对话历史（冗余恢复）")
@@ -240,6 +241,53 @@ _CONV_TTL_SECONDS = 7200
 _CONV_CLEANUP_INTERVAL = 600
 _last_conv_cleanup: float = 0.0
 _CONV_HISTORY_PATH = "data/conversation_history.json"
+_CONVERSATIONS_PATH = "data/conversations.json"
+_conversations: dict[str, list[dict[str, Any]]] = {}
+
+
+def _load_conversations() -> None:
+    """从磁盘加载多对话数据"""
+    import os as _os
+    global _conversations
+    try:
+        if _os.path.exists(_CONVERSATIONS_PATH):
+            with open(_CONVERSATIONS_PATH, "r", encoding="utf-8") as f:
+                _conversations = json.load(f)
+            total = sum(len(v) for v in _conversations.values())
+            if total:
+                logger.info(f"多对话数据从磁盘恢复 | conversations={total}")
+    except Exception as e:
+        logger.warning(f"多对话数据加载失败: {e}")
+
+
+def _save_conversations() -> None:
+    """保存多对话数据到磁盘"""
+    import os as _os
+    try:
+        _os.makedirs(_os.path.dirname(_CONVERSATIONS_PATH), exist_ok=True)
+        with open(_CONVERSATIONS_PATH, "w", encoding="utf-8") as f:
+            json.dump(_conversations, f, ensure_ascii=False, default=str)
+    except Exception as e:
+        logger.warning(f"多对话数据保存失败: {e}")
+
+
+def _get_user_conversations(user_id: str) -> list[dict[str, Any]]:
+    """获取用户的所有对话"""
+    if user_id not in _conversations:
+        _conversations[user_id] = []
+    return _conversations[user_id]
+
+
+def _get_conversation(user_id: str, conv_id: str) -> Optional[dict[str, Any]]:
+    """获取指定对话"""
+    for conv in _get_user_conversations(user_id):
+        if conv.get("id") == conv_id:
+            return conv
+    return None
+
+
+# 启动时加载多对话数据
+_load_conversations()
 
 
 def _load_conversation_history() -> None:
@@ -1106,6 +1154,154 @@ async def get_progress(request: Request):
         raise HTTPException(status_code=500, detail="学习进度服务暂时不可用，请稍后重试")
 
 
+# ===================== 多对话管理 API =====================
+
+class ConversationCreateRequest(BaseModel):
+    title: str = Field(default="", description="对话标题", max_length=200)
+
+
+class ConversationTitleRequest(BaseModel):
+    title: str = Field(description="新标题", min_length=1, max_length=200)
+
+
+@app.get("/conversations")
+async def list_conversations(request: Request):
+    """获取当前用户的所有对话列表"""
+    try:
+        user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="请先登录")
+        convs = _get_user_conversations(user_id)
+        result = []
+        for c in convs:
+            result.append({
+                "id": c.get("id", ""),
+                "title": c.get("title", "新对话"),
+                "created_at": c.get("created_at", 0),
+                "updated_at": c.get("updated_at", 0),
+                "message_count": len(c.get("messages", [])),
+            })
+        result.sort(key=lambda x: x.get("updated_at", 0), reverse=True)
+        return {"conversations": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"List conversations error: {e}")
+        raise HTTPException(status_code=500, detail="获取对话列表失败")
+
+
+@app.post("/conversations")
+async def create_conversation(body: ConversationCreateRequest, request: Request):
+    """创建新对话"""
+    try:
+        user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="请先登录")
+        import uuid
+        conv_id = str(uuid.uuid4())
+        now = time.time()
+        conv = {
+            "id": conv_id,
+            "title": body.title or "新对话",
+            "messages": [],
+            "created_at": now,
+            "updated_at": now,
+        }
+        _get_user_conversations(user_id).append(conv)
+        _save_conversations()
+        return {"id": conv_id, "title": conv["title"], "created_at": now, "message_count": 0}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Create conversation error: {e}")
+        raise HTTPException(status_code=500, detail="创建对话失败")
+
+
+@app.get("/conversations/{conv_id}")
+async def get_conversation_messages(conv_id: str, request: Request):
+    """获取指定对话的消息列表"""
+    try:
+        user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="请先登录")
+        conv = _get_conversation(user_id, conv_id)
+        if not conv:
+            raise HTTPException(status_code=404, detail="对话不存在")
+        return {
+            "id": conv["id"],
+            "title": conv.get("title", "新对话"),
+            "messages": conv.get("messages", []),
+            "created_at": conv.get("created_at", 0),
+            "updated_at": conv.get("updated_at", 0),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get conversation messages error: {e}")
+        raise HTTPException(status_code=500, detail="获取对话消息失败")
+
+
+@app.delete("/conversations/{conv_id}")
+async def delete_conversation(conv_id: str, request: Request):
+    """删除指定对话"""
+    try:
+        user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="请先登录")
+        convs = _get_user_conversations(user_id)
+        original_len = len(convs)
+        _conversations[user_id] = [c for c in convs if c.get("id") != conv_id]
+        if len(_conversations[user_id]) == original_len:
+            raise HTTPException(status_code=404, detail="对话不存在")
+        _save_conversations()
+        return {"message": "对话已删除"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Delete conversation error: {e}")
+        raise HTTPException(status_code=500, detail="删除对话失败")
+
+
+@app.put("/conversations/{conv_id}/title")
+async def update_conversation_title(conv_id: str, body: ConversationTitleRequest, request: Request):
+    """更新对话标题"""
+    try:
+        user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="请先登录")
+        conv = _get_conversation(user_id, conv_id)
+        if not conv:
+            raise HTTPException(status_code=404, detail="对话不存在")
+        conv["title"] = body.title
+        conv["updated_at"] = time.time()
+        _save_conversations()
+        return {"id": conv_id, "title": body.title}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Update conversation title error: {e}")
+        raise HTTPException(status_code=500, detail="更新标题失败")
+
+
+def _append_to_conversation(user_id: str, conv_id: str, role: str, content: str) -> None:
+    """向指定对话追加消息"""
+    if not user_id or not conv_id or not content:
+        return
+    conv = _get_conversation(user_id, conv_id)
+    if not conv:
+        return
+    conv["messages"].append({"role": role, "content": content})
+    conv["updated_at"] = time.time()
+    if len(conv["messages"]) > 500:
+        conv["messages"] = conv["messages"][-200:]
+    # 自动设置标题（取第一条用户消息的前30字）
+    if role == "user" and conv.get("title") == "新对话":
+        conv["title"] = content[:30] + ("..." if len(content) > 30 else "")
+    _save_conversations()
+
+
+# ===================== 聊天 API =====================
+
 @app.post("/chat/stream")
 async def chat_stream(request: ChatRequest):
     async def generate() -> AsyncGenerator[str, None]:
@@ -1187,6 +1383,9 @@ async def chat_stream(request: ChatRequest):
 
                 _append_to_history(request.user_id, "user", request.message)
                 _append_to_history(request.user_id, "assistant", full_reply)
+                if request.conversation_id:
+                    _append_to_conversation(request.user_id, request.conversation_id, "user", request.message)
+                    _append_to_conversation(request.user_id, request.conversation_id, "assistant", full_reply)
             else:
                 llm = LLMProvider()
                 model = llm.model
@@ -1211,6 +1410,8 @@ async def chat_stream(request: ChatRequest):
                         if content:
                             yield f"data: {json.dumps({'type': 'chunk', 'content': content}, ensure_ascii=False)}\n\n"
                     _append_to_history(request.user_id, "user", request.message)
+                    if request.conversation_id:
+                        _append_to_conversation(request.user_id, request.conversation_id, "user", request.message)
                 except (ValueError, RuntimeError, TypeError, KeyError, AttributeError):
                     logger.warning("流式对话失败，回退到非流式模式")
                     llm_response = await llm.achat(request.message, system_prompt=request.system_prompt)
@@ -1221,6 +1422,9 @@ async def chat_stream(request: ChatRequest):
                         await asyncio.sleep(0.02)
                     _append_to_history(request.user_id, "user", request.message)
                     _append_to_history(request.user_id, "assistant", llm_response)
+                    if request.conversation_id:
+                        _append_to_conversation(request.user_id, request.conversation_id, "user", request.message)
+                        _append_to_conversation(request.user_id, request.conversation_id, "assistant", llm_response)
 
             yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
 

@@ -1,0 +1,289 @@
+/* ===== 聊天区域 ===== */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* 空态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-5);
+  color: var(--color-text-secondary);
+  height: 100%;
+}
+.empty-state .icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+}
+.empty-state h3 {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-primary);
+}
+.empty-state ul {
+  text-align: left;
+  list-style: none;
+  padding: 0;
+}
+.empty-state ul li {
+  padding: var(--space-1) 0;
+  padding-left: var(--space-5);
+  position: relative;
+}
+.empty-state ul li::before {
+  content: "•";
+  position: absolute;
+  left: var(--space-2);
+  color: var(--color-accent);
+  font-weight: bold;
+}
+
+/* 消息气泡 */
+.message {
+  display: flex;
+  gap: var(--space-3);
+  max-width: 85%;
+  animation: messageIn 0.3s ease;
+}
+.message.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.message.assistant {
+  align-self: flex-start;
+}
+.message.system {
+  align-self: center;
+  max-width: 90%;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+@keyframes messageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+.message.user .message-avatar {
+  background: var(--color-accent-light);
+}
+
+.message-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.message-content {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.message-content pre {
+  background: var(--color-page);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  max-width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  margin: var(--space-3) 0;
+}
+.message-content pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+  white-space: pre;
+}
+.message-content code {
+  background: var(--color-page);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  border: 1px solid var(--color-border);
+}
+.message-content table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 100%;
+  margin: var(--space-3) 0;
+  overflow-x: auto;
+  display: block;
+}
+.message.assistant .message-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+.message.user .message-content {
+  background: var(--color-accent);
+  color: #fff;
+}
+.message.streaming .message-content::after {
+  content: "\258c";
+  animation: blink 1s step-end infinite;
+  margin-left: 1px;
+  font-weight: 100;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.message-agent {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  padding-left: var(--space-1);
+}
+
+/* 正在等待提示 */
+.streaming-waiting {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-size: var(--text-sm);
+}
+.streaming-waiting .dot-pulse::after {
+  content: "\258c";
+  animation: blink 1s step-end infinite;
+}
+
+/* 输入区域 */
+.chat-input-area {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-page);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.chat-input-row textarea {
+  flex: 1;
+  resize: none;
+  max-height: 120px;
+  min-height: 44px;
+  padding: var(--space-3);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  border-radius: var(--radius-lg);
+}
+
+.chat-input-row .btn-send {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  font-size: 1.2rem;
+}
+
+/* Markdown 内容样式 */
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.message-content h1:first-child,
+.message-content h2:first-child,
+.message-content h3:first-child {
+  margin-top: 0;
+}
+.message-content ul,
+.message-content ol {
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+.message-content li {
+  margin-bottom: var(--space-1);
+}
+.message-content blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: var(--space-3);
+  margin: var(--space-3) 0;
+  color: var(--color-text-secondary);
+}
+.message-content th,
+.message-content td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-size: var(--text-sm);
+}
+.message-content th {
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+/* KaTeX 数学公式 */
+.message-content .math-block {
+  display: block;
+  margin: var(--space-4) 0;
+  padding: var(--space-3) 0;
+  overflow-x: auto;
+  text-align: center;
+  max-width: 100%;
+}
+.message-content .math-block .katex {
+  font-size: 1.1em;
+  display: inline-block;
+  max-width: 100%;
+}
+.message-content .katex {
+  font-size: 1.05em;
+  max-width: 100%;
+}
+.message-content .katex-display {
+  margin: var(--space-3) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+.message-content .katex-display > .katex {
+  display: inline-block;
+  max-width: 100%;
+  white-space: normal;
+}
+/* 行列式/矩阵等长公式，在容器内横向滚动 */
+.message-content .katex .vmatrix,
+.message-content .katex .pmatrix,
+.message-content .katex .bmatrix {
+  max-width: 100%;
+  overflow-x: auto;
+}

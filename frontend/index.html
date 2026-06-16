@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI 驱动的学习辅助系统，提供学习规划、资料推荐、答疑解惑和测验生成等智能服务">
+  <meta name="theme-color" content="#4a5a7f">
+  <title>学习辅助系统</title>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+
+  <!-- 登录页面 -->
+  <div id="login-page" class="login-page active" role="main">
+    <div class="auth-card" role="region" aria-label="登录区域">
+      <h2>📚 学习辅助</h2>
+
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" data-tab="login" role="tab" aria-selected="true">登录</button>
+        <button class="auth-tab" data-tab="register" role="tab" aria-selected="false">注册</button>
+      </div>
+
+      <!-- 登录表单 -->
+      <form class="auth-form active" data-form="login" onsubmit="return false">
+        <div class="form-group">
+          <label for="login-username">用户名</label>
+          <input type="text" id="login-username" placeholder="请输入用户名" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="login-password">密码</label>
+          <input type="password" id="login-password" placeholder="请输入密码" autocomplete="current-password">
+        </div>
+        <button type="button" id="btn-login" class="btn btn-primary btn-block">登录</button>
+      </form>
+
+      <!-- 注册表单 -->
+      <form class="auth-form" data-form="register" onsubmit="return false">
+        <div class="form-group">
+          <label for="reg-username">用户名 <span class="form-hint">（必填，至少3个字符）</span></label>
+          <input type="text" id="reg-username" placeholder="请输入用户名" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="reg-display-name">昵称 <span class="form-hint">（可选）</span></label>
+          <input type="text" id="reg-display-name" placeholder="请输入昵称">
+        </div>
+        <div class="form-group">
+          <label for="reg-email">邮箱 <span class="form-hint">（可选）</span></label>
+          <input type="email" id="reg-email" placeholder="请输入邮箱" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">密码 <span class="form-hint">（必填，至少6个字符）</span></label>
+          <input type="password" id="reg-password" placeholder="请输入密码" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="reg-password-confirm">确认密码</label>
+          <input type="password" id="reg-password-confirm" placeholder="请再次输入密码" autocomplete="new-password">
+        </div>
+        <button type="button" id="btn-register" class="btn btn-primary btn-block">注册</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 主界面 -->
+  <div id="main-page" class="page-container">
+    <a href="#main-content" class="skip-link">跳至主内容</a>
+
+    <div class="app-layout">
+      <!-- 侧边栏遮罩 -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+      <!-- 侧边栏 -->
+      <aside id="sidebar" class="sidebar" role="navigation" aria-label="侧边导航">
+        <div class="sidebar-header sidebar-user-info">
+          <div class="sidebar-user-text">
+            <h3 id="sidebar-display-name">用户</h3>
+            <div class="username" id="sidebar-username">@username</div>
+          </div>
+          <button id="sidebar-close" class="sidebar-close" aria-label="关闭侧边栏">✕</button>
+        </div>
+
+        <div class="sidebar-body">
+          <!-- 历史对话 -->
+          <div class="sidebar-section">
+            <div class="conv-header">
+              <span class="conv-header-title">💬 历史对话</span>
+              <button id="btn-new-conv" class="btn-new-conv" aria-label="新建对话" title="新建对话">+</button>
+            </div>
+            <div id="conv-list" class="conv-list"></div>
+          </div>
+
+          <!-- 主题切换 -->
+          <div class="sidebar-section">
+            <div class="theme-toggle-row">
+              <span class="theme-toggle-label">🌓 主题</span>
+              <button id="btn-theme-toggle" class="theme-toggle-btn" aria-label="切换明暗主题" title="切换明暗主题">
+                <span id="theme-icon">🌙</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 个人设置 -->
+          <div class="sidebar-section">
+            <details class="panel" id="panel-settings">
+              <summary>👤 个人设置</summary>
+              <div class="panel-body">
+                <button type="button" id="btn-refresh-profile" class="btn btn-ghost btn-block" style="margin-bottom:8px;">🔄 刷新信息</button>
+                <div class="settings-form">
+                  <div class="form-row">
+                    <label for="settings-display_name">昵称</label>
+                    <input type="text" id="settings-display_name" placeholder="昵称">
+                  </div>
+                  <div class="form-row">
+                    <label for="settings-email">邮箱</label>
+                    <input type="email" id="settings-email" placeholder="邮箱">
+                  </div>
+                  <div class="form-row">
+                    <label for="settings-level">当前水平</label>
+                    <select id="settings-level">
+                      <option value="beginner">入门</option>
+                      <option value="intermediate">中级</option>
+                      <option value="advanced">高级</option>
+                      <option value="expert">专家</option>
+                    </select>
+                  </div>
+                  <div class="form-row">
+                    <label for="settings-target_field">目标领域</label>
+                    <input type="text" id="settings-target_field" placeholder="例如：Python、机器学习">
+                  </div>
+                  <div class="form-row-inline">
+                    <label for="settings-available_time">每周可用时间</label>
+                    <span id="settings-time-value">10</span><span>小时</span>
+                  </div>
+                  <input type="range" id="settings-available_time" min="1" max="80" value="10">
+                  <button type="button" id="btn-save-settings" class="btn btn-primary btn-block">💾 保存设置</button>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- 修改密码 -->
+          <div class="sidebar-section">
+            <details class="panel" id="panel-password">
+              <summary>🔒 修改密码</summary>
+              <div class="panel-body">
+                <div class="settings-form">
+                  <div class="form-row">
+                    <label for="settings-old-password">原密码</label>
+                    <input type="password" id="settings-old-password" placeholder="原密码" autocomplete="current-password">
+                  </div>
+                  <div class="form-row">
+                    <label for="settings-new-password">新密码</label>
+                    <input type="password" id="settings-new-password" placeholder="新密码（至少6位）" autocomplete="new-password">
+                  </div>
+                  <div class="form-row">
+                    <label for="settings-new-password-confirm">确认新密码</label>
+                    <input type="password" id="settings-new-password-confirm" placeholder="再次输入新密码" autocomplete="new-password">
+                  </div>
+                  <button type="button" id="btn-change-password" class="btn btn-primary btn-block">🔑 修改密码</button>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- Agent 选择器 -->
+          <div class="sidebar-section">
+            <details class="panel" id="panel-agent" open>
+              <summary>🤖 Agent 选择</summary>
+              <div class="panel-body">
+                <div class="agent-selector" role="radiogroup" aria-label="选择 Agent">
+                  <label class="radio-item checked">
+                    <input type="radio" name="agent" value="auto" checked>
+                    <span>自动识别 (推荐)</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="agent" value="planner">
+                    <span>学习规划师</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="agent" value="expert">
+                    <span>学习专家</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="agent" value="partner">
+                    <span>学习伙伴</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="agent" value="quizzer">
+                    <span>出题官</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="agent" value="reviewer">
+                    <span>复习助理</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="agent" value="examiner">
+                    <span>考试指导</span>
+                  </label>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- 快捷操作 -->
+          <div class="sidebar-section">
+            <div class="quick-actions">
+              <button type="button" id="btn-quick-plan" class="btn btn-secondary">📋 计划</button>
+              <button type="button" id="btn-logout" class="btn btn-danger">🚪 退出</button>
+            </div>
+          </div>
+
+          <!-- 测验生成 -->
+          <div class="sidebar-section">
+            <details class="panel" id="panel-quiz">
+              <summary>🧪 测验</summary>
+              <div class="panel-body">
+                <div class="quiz-form">
+                  <div class="form-row">
+                    <label for="quiz-gen-topic">知识点</label>
+                    <input type="text" id="quiz-gen-topic" value="Python基础" placeholder="输入知识点">
+                  </div>
+                  <div class="range-row">
+                    <label for="quiz-gen-count">题目数量</label>
+                    <span id="quiz-count-value">3</span>
+                  </div>
+                  <input type="range" id="quiz-gen-count" min="1" max="10" value="3">
+                  <button type="button" id="btn-generate-quiz" class="btn btn-primary btn-block">🎯 生成测验</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 汉堡菜单按钮（侧边栏之后，以便 CSS sibling 选择器生效） -->
+      <button id="sidebar-toggle" class="sidebar-toggle" aria-label="切换侧边栏" aria-expanded="false">☰</button>
+
+      <!-- 主内容区 -->
+      <main class="main-content" id="main-content">
+        <div class="chat-page active" id="chat-page">
+          <div class="main-header">
+            <h1>📚 学习辅助系统</h1>
+          </div>
+          <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="聊天消息">
+            <!-- 动态渲染消息 -->
+          </div>
+          <div class="chat-input-area">
+            <div class="chat-input-row">
+              <textarea
+                id="chat-input"
+                rows="1"
+                placeholder="输入你的问题... (Enter 发送，Shift+Enter 换行)"
+                aria-label="输入消息"
+              ></textarea>
+              <button id="btn-send" class="btn btn-primary btn-send" aria-label="发送消息">↑</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast 容器 -->
+  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <!-- JavaScript -->
+  <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/sse.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/conversations.js"></script>
+    <script src="js/auth.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

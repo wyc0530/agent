@@ -157,7 +157,7 @@ class LLMProvider:
         system_prompt: str = "",
         use_local: bool = False,
         temperature: float = 0.7,
-        max_tokens: int = 2048,
+        max_tokens: int = 4096,
     ) -> str:
         messages: list[BaseMessage] = []
         if system_prompt:
@@ -171,7 +171,7 @@ class LLMProvider:
         user_message: str,
         system_prompt: str = "",
         temperature: float = 0.7,
-        max_tokens: int = 2048,
+        max_tokens: int = 4096,
     ) -> AsyncGenerator[str, None]:
         """流式对话，逐 token 返回 LLM 生成内容。
 
@@ -199,7 +199,7 @@ class LLMProvider:
         history: list[BaseMessage],
         system_prompt: str = "",
         temperature: float = 0.7,
-        max_tokens: int = 2048,
+        max_tokens: int = 4096,
     ) -> AsyncGenerator[str, None]:
         """带历史记录的流式对话，逐 token 返回 LLM 生成内容。
 
@@ -255,7 +255,7 @@ class LLMProvider:
         history: list[BaseMessage],
         system_prompt: str = "",
         temperature: float = 0.7,
-        max_tokens: int = 2048,
+        max_tokens: int = 4096,
     ) -> str:
         messages: list[BaseMessage] = []
         if system_prompt:

@@ -548,8 +548,9 @@ class TestExpertContextAware:
 
         agent = ExpertAgent()
         with patch.object(agent, "_chat") as mock_chat:
-            mock_chat.return_value = "推荐更多"
+            mock_chat.return_value = "Thought: 需要先搜索\nAction: SEARCH\nAction Input: 数据结构书籍"
             agent.run(state, "还有哪些书籍推荐")
+            # ReAct模式下，system_prompt通过_build_react_prompt作为第一个参数传入
             system_prompt = mock_chat.call_args[0][0]
             assert "数据结构" in system_prompt
 

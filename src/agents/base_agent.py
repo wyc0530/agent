@@ -55,7 +55,7 @@ class BaseAgent(ABC):
         history = kwargs.pop("history", None)
 
         temperature = kwargs.get("temperature", 0.7)
-        max_tokens = kwargs.get("max_tokens", 2048)
+        max_tokens = kwargs.get("max_tokens", 4096)
 
         try:
             if history:
@@ -123,7 +123,7 @@ class BaseAgent(ABC):
         full_prompt = system_prompt + boundary
         history = self._extract_history(state)
         temperature = kwargs.get("temperature", 0.7)
-        max_tokens = kwargs.get("max_tokens", 2048)
+        max_tokens = kwargs.get("max_tokens", 4096)
         return full_prompt, message, history, temperature, max_tokens
 
     @staticmethod
