@@ -25,7 +25,7 @@
   <!-- 登录页面 -->
   <div id="login-page" class="login-page active" role="main">
     <div class="auth-card" role="region" aria-label="登录区域">
-      <h2>📚 学习辅助</h2>
+      <h2>学习辅助</h2>
 
       <div class="auth-tabs" role="tablist">
         <button class="auth-tab active" data-tab="login" role="tab" aria-selected="true">登录</button>
@@ -87,25 +87,29 @@
             <h3 id="sidebar-display-name">用户</h3>
             <div class="username" id="sidebar-username">@username</div>
           </div>
-          <button id="sidebar-close" class="sidebar-close" aria-label="关闭侧边栏">✕</button>
+          <button id="sidebar-close" class="sidebar-close" aria-label="关闭侧边栏">&#x2715;</button>
         </div>
 
         <div class="sidebar-body">
-          <!-- 历史对话 -->
-          <div class="sidebar-section">
-            <div class="conv-header">
-              <span class="conv-header-title">💬 历史对话</span>
-              <button id="btn-new-conv" class="btn-new-conv" aria-label="新建对话" title="新建对话">+</button>
-            </div>
-            <div id="conv-list" class="conv-list"></div>
-          </div>
-
           <!-- 主题切换 -->
           <div class="sidebar-section">
             <div class="theme-toggle-row">
-              <span class="theme-toggle-label">🌓 主题</span>
+              <span class="theme-toggle-label">主题</span>
               <button id="btn-theme-toggle" class="theme-toggle-btn" aria-label="切换明暗主题" title="切换明暗主题">
-                <span id="theme-icon">🌙</span>
+                <svg class="theme-icon theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"/>
+                  <line x1="12" y1="1" x2="12" y2="3"/>
+                  <line x1="12" y1="21" x2="12" y2="23"/>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                  <line x1="1" y1="12" x2="3" y2="12"/>
+                  <line x1="21" y1="12" x2="23" y2="12"/>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="theme-icon theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -113,9 +117,9 @@
           <!-- 个人设置 -->
           <div class="sidebar-section">
             <details class="panel" id="panel-settings">
-              <summary>👤 个人设置</summary>
+              <summary>个人设置</summary>
               <div class="panel-body">
-                <button type="button" id="btn-refresh-profile" class="btn btn-ghost btn-block" style="margin-bottom:8px;">🔄 刷新信息</button>
+                <button type="button" id="btn-refresh-profile" class="btn btn-ghost btn-block" style="margin-bottom:8px;">刷新信息</button>
                 <div class="settings-form">
                   <div class="form-row">
                     <label for="settings-display_name">昵称</label>
@@ -143,7 +147,7 @@
                     <span id="settings-time-value">10</span><span>小时</span>
                   </div>
                   <input type="range" id="settings-available_time" min="1" max="80" value="10">
-                  <button type="button" id="btn-save-settings" class="btn btn-primary btn-block">💾 保存设置</button>
+                  <button type="button" id="btn-save-settings" class="btn btn-primary btn-block">保存设置</button>
                 </div>
               </div>
             </details>
@@ -152,7 +156,7 @@
           <!-- 修改密码 -->
           <div class="sidebar-section">
             <details class="panel" id="panel-password">
-              <summary>🔒 修改密码</summary>
+              <summary>修改密码</summary>
               <div class="panel-body">
                 <div class="settings-form">
                   <div class="form-row">
@@ -167,7 +171,7 @@
                     <label for="settings-new-password-confirm">确认新密码</label>
                     <input type="password" id="settings-new-password-confirm" placeholder="再次输入新密码" autocomplete="new-password">
                   </div>
-                  <button type="button" id="btn-change-password" class="btn btn-primary btn-block">🔑 修改密码</button>
+                  <button type="button" id="btn-change-password" class="btn btn-primary btn-block">修改密码</button>
                 </div>
               </div>
             </details>
@@ -176,7 +180,7 @@
           <!-- Agent 选择器 -->
           <div class="sidebar-section">
             <details class="panel" id="panel-agent" open>
-              <summary>🤖 Agent 选择</summary>
+              <summary>Agent 选择</summary>
               <div class="panel-body">
                 <div class="agent-selector" role="radiogroup" aria-label="选择 Agent">
                   <label class="radio-item checked">
@@ -212,18 +216,27 @@
             </details>
           </div>
 
+          <!-- 历史对话（移至 Agent 选择器下方） -->
+          <div class="sidebar-section">
+            <div class="conv-header">
+              <span class="conv-header-title">历史对话</span>
+              <button id="btn-new-conv" class="btn-new-conv" aria-label="新建对话" title="新建对话">+</button>
+            </div>
+            <div id="conv-list" class="conv-list"></div>
+          </div>
+
           <!-- 快捷操作 -->
           <div class="sidebar-section">
             <div class="quick-actions">
-              <button type="button" id="btn-quick-plan" class="btn btn-secondary">📋 计划</button>
-              <button type="button" id="btn-logout" class="btn btn-danger">🚪 退出</button>
+              <button type="button" id="btn-quick-plan" class="btn btn-secondary">计划</button>
+              <button type="button" id="btn-logout" class="btn btn-danger">退出</button>
             </div>
           </div>
 
           <!-- 测验生成 -->
           <div class="sidebar-section">
             <details class="panel" id="panel-quiz">
-              <summary>🧪 测验</summary>
+              <summary>测验</summary>
               <div class="panel-body">
                 <div class="quiz-form">
                   <div class="form-row">
@@ -235,7 +248,7 @@
                     <span id="quiz-count-value">3</span>
                   </div>
                   <input type="range" id="quiz-gen-count" min="1" max="10" value="3">
-                  <button type="button" id="btn-generate-quiz" class="btn btn-primary btn-block">🎯 生成测验</button>
+                  <button type="button" id="btn-generate-quiz" class="btn btn-primary btn-block">生成测验</button>
                 </div>
               </div>
             </details>
@@ -244,13 +257,15 @@
       </aside>
 
       <!-- 汉堡菜单按钮（侧边栏之后，以便 CSS sibling 选择器生效） -->
-      <button id="sidebar-toggle" class="sidebar-toggle" aria-label="切换侧边栏" aria-expanded="false">☰</button>
+      <button id="sidebar-toggle" class="sidebar-toggle" aria-label="展开侧边栏" aria-expanded="false">
+        <span class="sidebar-toggle-icon">&rarr;</span>
+      </button>
 
       <!-- 主内容区 -->
       <main class="main-content" id="main-content">
         <div class="chat-page active" id="chat-page">
           <div class="main-header">
-            <h1>📚 学习辅助系统</h1>
+            <h1>学习辅助系统</h1>
           </div>
           <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="聊天消息">
             <!-- 动态渲染消息 -->

@@ -41,8 +41,8 @@ describe('Chat', () => {
     });
 
     it('有消息时渲染消息列表', () => {
-      AppState.addMessage({ role: 'user', content: '你好', avatar: '👤', timestamp: Date.now() });
-      AppState.addMessage({ role: 'assistant', content: '你好！', avatar: '🤖', agent: '学习伙伴', timestamp: Date.now() });
+      AppState.addMessage({ role: 'user', content: '你好', avatar: 'U', timestamp: Date.now() });
+      AppState.addMessage({ role: 'assistant', content: '你好！', avatar: 'AI', agent: '学习伙伴', timestamp: Date.now() });
       Chat.renderHistory();
       const messages = document.querySelectorAll('.message');
       expect(messages.length).toBe(2);

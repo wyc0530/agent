@@ -62,7 +62,7 @@ var Conversations = (function () {
       var delBtn = document.createElement('button');
       delBtn.className = 'conv-delete';
       delBtn.setAttribute('aria-label', '删除对话');
-      delBtn.textContent = '🗑';
+      delBtn.textContent = '\u00D7';
       delBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         deleteConversation(conv.id);
@@ -119,7 +119,7 @@ var Conversations = (function () {
         return {
           role: m.role,
           content: m.content,
-          avatar: m.role === 'user' ? '👤' : '🤖',
+          avatar: m.role === 'user' ? 'U' : 'AI',
           timestamp: Date.now(),
         };
       });

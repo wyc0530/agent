@@ -569,14 +569,3 @@ docker run -d -p 80:80 -v $(pwd)/frontend:/usr/share/nginx/html:ro nginx:alpine
 | [使用手册](.trae/documents/USER_MANUAL.md) | 用户操作指南 |
 | [http://localhost:8000/docs](http://localhost:8000/docs) | Swagger API 交互文档（需启动服务） |
 
----
-
-## 生产上线状态
-
-**已达到生产环境上线标准**（综合评分 9.2/10）
-
-- **功能完整性**：9.5/10 — 7 个 Agent + 5 个工具 + 21 个 API 端点 + 前端 9 个 JS 模块 + 7 个 CSS 文件
-- **安全标准**：9.3/10 — CSRF 精确域名匹配 + 认证暴力破解防护 + XSS 防护 + JSON 反序列化 + PBKDF2 密码哈希
-- **测试覆盖率**：8.5/10 — 后端 290+ 测试用例 + 前端 66 测试用例（100% 通过率）
-- **部署就绪**：9.0/10 — Dockerfile 多阶段构建 + docker-compose 编排 + 前端静态部署
-- **代码质量**：9.0/10 — 前端模块化组件架构，后端分层清晰，零 lint 诊断

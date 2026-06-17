@@ -36,10 +36,15 @@ details.panel summary::-webkit-details-marker {
   display: none;
 }
 details.panel summary::before {
-  content: "▶";
-  font-size: 0.65rem;
-  transition: transform var(--transition-fast);
+  content: "";
   display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid var(--color-text-secondary);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
 }
 details.panel[open] summary::before {
   transform: rotate(90deg);
@@ -246,11 +251,36 @@ details.panel .panel-body {
   border-radius: var(--radius-md);
   background: var(--color-page);
   cursor: pointer;
-  font-size: 1.2rem;
   transition: background var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+  overflow: hidden;
 }
 .theme-toggle-btn:hover {
   background: var(--color-border);
+}
+/* 主题图标 */
+.theme-icon {
+  position: absolute;
+  transition: opacity 0.3s ease, transform 0.4s ease;
+  color: var(--color-accent);
+}
+/* 亮色模式：显示太阳 */
+.theme-icon-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+.theme-icon-moon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+/* 暗色模式：切换为月亮 */
+[data-theme="dark"] .theme-icon-sun {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+[data-theme="dark"] .theme-icon-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 /* 历史对话列表 */

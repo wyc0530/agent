@@ -23,6 +23,7 @@ var Sidebar = (function () {
     }
     if (_toggleBtn) {
       _toggleBtn.setAttribute('aria-expanded', 'true');
+      _toggleBtn.setAttribute('aria-label', '收起侧边栏');
     }
 
     // 汉堡菜单切换
@@ -55,7 +56,10 @@ var Sidebar = (function () {
     if (!_sidebarEl) return;
     _sidebarEl.classList.add('open');
     if (_overlayEl) _overlayEl.classList.add('open');
-    if (_toggleBtn) _toggleBtn.setAttribute('aria-expanded', 'true');
+    if (_toggleBtn) {
+      _toggleBtn.setAttribute('aria-expanded', 'true');
+      _toggleBtn.setAttribute('aria-label', '收起侧边栏');
+    }
   }
 
   /** 切换侧边栏 */
@@ -73,7 +77,10 @@ var Sidebar = (function () {
   function closeSidebar() {
     if (_sidebarEl) _sidebarEl.classList.remove('open');
     if (_overlayEl) _overlayEl.classList.remove('open');
-    if (_toggleBtn) _toggleBtn.setAttribute('aria-expanded', 'false');
+    if (_toggleBtn) {
+      _toggleBtn.setAttribute('aria-expanded', 'false');
+      _toggleBtn.setAttribute('aria-label', '展开侧边栏');
+    }
   }
 
   /** 初始化用户信息 */

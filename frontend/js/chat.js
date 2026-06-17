@@ -15,9 +15,9 @@ var Chat = (function () {
     'examiner': '考试指导',
   };
 
-  var AVATAR_USER = '\uD83D\uDC64';    // 👤
-  var AVATAR_ASSISTANT = '\uD83E\uDD16'; // 🤖
-  var AVATAR_SYSTEM = '\u26A0\uFE0F';    // ⚠️
+  var AVATAR_USER = 'U';       // 用户首字母
+  var AVATAR_ASSISTANT = 'AI';  // 助手标识
+  var AVATAR_SYSTEM = '!';      // 系统标识
 
   var _messagesEl = null;
   var _inputEl = null;
@@ -72,7 +72,7 @@ var Chat = (function () {
     if (!_messagesEl) return;
     _messagesEl.innerHTML = ''
       + '<div class="empty-state" role="status">'
-      + '<div class="icon">📚</div>'
+      + '<div class="icon"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2.5"/><line x1="4" y1="14" x2="44" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="16" y1="6" x2="16" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="32" y1="6" x2="32" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="20" y1="22" x2="28" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="28" x2="24" y2="28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>'
       + '<h3>欢迎使用学习辅助系统</h3>'
       + '<p>我是你的 AI 学习助手，可以帮你：</p>'
       + '<ul>'
@@ -301,7 +301,7 @@ var Chat = (function () {
         }
         _streamingMsg.fullText += chunk;
         _streamingMsg.contentEl.innerHTML = formatContent(_streamingMsg.fullText);
-        Utils.scrollToBottom(_messagesEl, false);
+        Utils.smartScrollToBottom(_messagesEl, 80);
       },
       onDone: function () {
         finalizeMessage();
@@ -320,20 +320,20 @@ var Chat = (function () {
 
     if (errorMsg) {
       Toast.show(errorMsg, 'error');
-      _streamingMsg.contentEl.textContent = '❌ ' + errorMsg;
+      _streamingMsg.contentEl.textContent = '[错误] ' + errorMsg;
       var agentLabel = _streamingMsg.agentRole
         ? AGENT_ROLE_LABELS[_streamingMsg.agentRole] || _streamingMsg.agentRole
         : '系统';
       AppState.addMessage({
         role: 'system',
-        content: '❌ ' + errorMsg,
+        content: '[错误] ' + errorMsg,
         avatar: AVATAR_SYSTEM,
         agent: agentLabel,
         timestamp: Date.now(),
       });
     } else {
       if (!_streamingMsg.fullText.trim()) {
-        _streamingMsg.fullText = '⚠️ 服务器响应超时，请稍后重试。';
+        _streamingMsg.fullText = '[提示] 服务器响应超时，请稍后重试。';
         Toast.show(_streamingMsg.fullText, 'warning');
       }
       _streamingMsg.contentEl.innerHTML = formatContent(_streamingMsg.fullText);

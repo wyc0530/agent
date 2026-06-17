@@ -123,6 +123,23 @@ var Utils = (function () {
     try { return JSON.parse(str); } catch (e) { return fallback !== undefined ? fallback : null; }
   }
 
+  /** 检查是否接近底部（用于智能滚动） */
+  function isNearBottom(el, threshold) {
+    if (!el) return true;
+    threshold = threshold || 100;
+    return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+  }
+
+  /** 智能滚动到底部：仅在用户未手动上滚时自动滚动 */
+  function smartScrollToBottom(el, threshold) {
+    if (!el) return;
+    if (isNearBottom(el, threshold)) {
+      requestAnimationFrame(function () {
+        el.scrollTop = el.scrollHeight;
+      });
+    }
+  }
+
   return {
     debounce: debounce,
     throttle: throttle,
@@ -135,6 +152,8 @@ var Utils = (function () {
     validateEmail: validateEmail,
     formatTime: formatTime,
     scrollToBottom: scrollToBottom,
+    smartScrollToBottom: smartScrollToBottom,
+    isNearBottom: isNearBottom,
     safeJsonParse: safeJsonParse,
   };
 })();

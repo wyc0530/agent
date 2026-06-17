@@ -23,7 +23,7 @@ var Toast = (function () {
     duration = (duration !== undefined) ? duration : 3000;
 
     var container = _ensureContainer();
-    var icon = type === 'success' ? '✓' : type === 'error' ? '✗' : '⚠';
+    var icon = type === 'success' ? '\u2713' : type === 'error' ? '\u2717' : '!';
     var toast = Utils.createEl('div', {
       className: 'toast ' + type,
       textContent: icon + ' ' + message,

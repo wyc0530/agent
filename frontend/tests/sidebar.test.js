@@ -110,7 +110,7 @@ beforeEach(() => {
         </div>
       </div>
     </aside>
-    <button id="sidebar-toggle">☰</button>
+    <button id="sidebar-toggle"><span class="sidebar-toggle-icon">&rarr;</span></button>
     <div id="sidebar-overlay"></div>
   `;
 });

@@ -10,7 +10,6 @@ var Theme = (function () {
   var THEME_DARK = 'dark';
 
   var _btn = null;
-  var _icon = null;
 
   /** 获取当前主题 */
   function getTheme() {
@@ -23,7 +22,6 @@ var Theme = (function () {
     try {
       localStorage.setItem(THEME_KEY, theme);
     } catch (e) { /* 忽略存储错误 */ }
-    _updateIcon(theme);
   }
 
   /** 切换主题 */
@@ -33,17 +31,9 @@ var Theme = (function () {
     setTheme(next);
   }
 
-  /** 更新图标 */
-  function _updateIcon(theme) {
-    if (_icon) {
-      _icon.textContent = theme === THEME_DARK ? '☀️' : '🌙';
-    }
-  }
-
   /** 初始化主题 */
   function initTheme() {
     _btn = document.getElementById('btn-theme-toggle');
-    _icon = document.getElementById('theme-icon');
 
     // 从 localStorage 恢复主题，无记录时默认亮色
     var savedTheme = null;
