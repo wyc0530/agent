@@ -142,6 +142,7 @@ var Conversations = (function () {
     ApiClient.getConversationMessages(convId).then(function (data) {
       var msgs = (data.messages || []).map(function (m) {
         return {
+          id: m.id,
           role: m.role,
           content: m.content,
           avatar: m.role === 'user' ? 'U' : 'AI',

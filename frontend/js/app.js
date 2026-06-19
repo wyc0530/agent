@@ -64,7 +64,7 @@ var App = (function () {
     if (typeof Sidebar !== 'undefined') {
       Sidebar.init();
     }
-    // 初始化聊天
+    // 初始化聊天（集成文件上传功能）
     if (typeof Chat !== 'undefined') {
       Chat.initChat();
     }

@@ -5,9 +5,9 @@ import threading
 import time
 from typing import Any, AsyncGenerator, Optional
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, File as FastAPIFile, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -1192,6 +1192,30 @@ async def delete_conversation(conv_id: str, request: Request):
         raise HTTPException(status_code=500, detail="删除对话失败")
 
 
+@app.delete("/conversations/{conv_id}/messages/{msg_id}")
+async def delete_message(conv_id: str, msg_id: int, request: Request):
+    """删除单条问答记录（级联删除关联的 assistant 回复）"""
+    try:
+        user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="请先登录")
+        from src.core.user_store import get_user_store
+        store = get_user_store()
+        # 验证对话属于当前用户
+        conv = store.get_conversation(user_id, conv_id)
+        if not conv:
+            raise HTTPException(status_code=404, detail="对话不存在")
+        deleted = store.delete_message_pair(conv_id, msg_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="消息不存在")
+        return {"message": "问答记录已删除"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Delete message error: {e}")
+        raise HTTPException(status_code=500, detail="删除消息失败")
+
+
 @app.put("/conversations/{conv_id}/title")
 async def update_conversation_title(conv_id: str, body: ConversationTitleRequest, request: Request):
     """更新对话标题"""
@@ -1404,6 +1428,226 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ============================================================
+# 文件处理与问答系统
+# ============================================================
+
+class FileAskRequest(BaseModel):
+    """文件问答请求"""
+    file_id: str = Field(..., description="已上传文件的ID")
+    question: str = Field(..., min_length=1, max_length=5000, description="用户提问内容")
+    conversation_id: str = Field(default="", description="所属对话ID，用于持久化问答记录")
+
+
+class FileUploadResponse(BaseModel):
+    """文件上传响应"""
+    file_id: str
+    original_name: str
+    size: int
+    content_preview: str
+    message: str
+
+
+@app.post("/file/upload", response_model=FileUploadResponse)
+async def upload_file(file: UploadFile):
+    """上传文件并解析内容"""
+    from src.core.file_processor import (
+        allowed_file, get_file_size_limit, parse_file, save_uploaded_file,
+    )
+    try:
+        if not file.filename:
+            raise HTTPException(status_code=400, detail="未选择文件")
+
+        if not allowed_file(file.filename):
+            raise HTTPException(
+                status_code=400,
+                detail="不支持的文件格式，支持的格式: PDF, Word, TXT, 代码文件等",
+            )
+
+        content_bytes = await file.read()
+        file_size = len(content_bytes)
+        max_size = get_file_size_limit()
+
+        if file_size > max_size:
+            raise HTTPException(
+                status_code=413,
+                detail=f"文件大小超过限制 ({max_size // 1024 // 1024}MB)",
+            )
+
+        if file_size == 0:
+            raise HTTPException(status_code=400, detail="文件为空")
+
+        try:
+            parsed_content = parse_file(content_bytes, file.filename)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except RuntimeError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+        file_info = save_uploaded_file(content_bytes, file.filename)
+
+        preview = parsed_content[:500] + ("..." if len(parsed_content) > 500 else "")
+
+        logger.info(
+            f"File uploaded | id={file_info['file_id']} "
+            f"name={file.filename} size={file_size} chars={len(parsed_content)}"
+        )
+
+        return FileUploadResponse(
+            file_id=file_info["file_id"],
+            original_name=file.filename,
+            size=file_size,
+            content_preview=preview,
+            message=f"文件上传成功，已解析 {len(parsed_content)} 个字符",
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"File upload error: {e}")
+        raise HTTPException(status_code=500, detail="文件上传失败")
+
+
+@app.post("/file/ask")
+async def ask_file_question(body: FileAskRequest, request: Request):
+    """基于上传文件内容回答问题，并生成 Word 文档"""
+    from src.core.file_processor import get_uploaded_file, parse_file
+    from src.core.word_generator import generate_word_bytes, OUTPUT_DIR
+    import uuid as _uuid
+
+    try:
+        file_info = get_uploaded_file(body.file_id)
+        if not file_info:
+            raise HTTPException(status_code=404, detail="文件不存在或已过期")
+
+        with open(file_info["path"], "rb") as f:
+            file_bytes = f.read()
+
+        try:
+            file_content = parse_file(file_bytes, file_info["original_name"])
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        system_prompt = (
+            "你是一个专业的文件分析助手。请根据用户提供的文件内容，准确回答用户的问题。\n"
+            "要求：\n"
+            "1. 回答要基于文件内容，不要编造信息\n"
+            "2. 如果文件内容不足以回答问题，请明确说明\n"
+            "3. 回答要结构化，使用标题、列表等格式\n"
+            "4. 引用文件中的具体内容来支持你的回答"
+        )
+
+        user_prompt = (
+            f"## 文件内容\n\n{file_content[:8000]}\n\n"
+            f"## 用户问题\n\n{body.question}\n\n"
+            f"请基于以上文件内容回答用户的问题。"
+        )
+
+        llm = LLMProvider()
+        response = llm.chat(
+            user_message=user_prompt,
+            system_prompt=system_prompt,
+            temperature=0.3,
+            max_tokens=4096,
+        )
+
+        answer = response.strip() if isinstance(response, str) else str(response)
+
+        doc_bytes = generate_word_bytes(
+            content=answer,
+            title=f"文件问答: {file_info['original_name']}",
+            question=body.question,
+        )
+
+        download_filename = f"qa_{_uuid.uuid4().hex[:8]}.docx"
+        doc_path = OUTPUT_DIR / download_filename
+        with open(doc_path, "wb") as f:
+            f.write(doc_bytes)
+
+        logger.info(
+            f"File Q&A completed | file_id={body.file_id} "
+            f"question_len={len(body.question)} answer_len={len(answer)}"
+        )
+
+        # 持久化到对话历史
+        if body.conversation_id:
+            auth_user_id = getattr(request.state, "user_id", "")
+            _append_to_conversation(auth_user_id, body.conversation_id, "user", body.question)
+            _append_to_conversation(auth_user_id, body.conversation_id, "assistant", answer)
+
+        return {
+            "file_id": body.file_id,
+            "question": body.question,
+            "answer": answer,
+            "download_filename": download_filename,
+        }
+
+    except HTTPException:
+        raise
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"File ask error: {e}")
+        raise HTTPException(status_code=500, detail="文件问答处理失败")
+
+
+@app.get("/file/download/{filename}")
+async def download_file(filename: str):
+    """下载生成的 Word 文档"""
+    from src.core.word_generator import OUTPUT_DIR
+    import re
+
+    if not re.match(r'^[a-zA-Z0-9_\-\.]+$', filename):
+        raise HTTPException(status_code=400, detail="无效的文件名")
+
+    file_path = OUTPUT_DIR / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="文件不存在")
+
+    logger.info(f"File download | filename={filename}")
+
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+class ChatExportRequest(BaseModel):
+    """对话导出请求"""
+    question: str = Field(default="", max_length=5000)
+    answer: str = Field(..., min_length=1, max_length=50000)
+    title: str = Field(default="问答记录", max_length=200)
+
+
+@app.post("/chat/export")
+async def export_chat_answer(body: ChatExportRequest):
+    """将对话回答导出为 Word 文档"""
+    from src.core.word_generator import generate_word_bytes, OUTPUT_DIR
+    import uuid as _uuid
+
+    try:
+        doc_bytes = generate_word_bytes(
+            content=body.answer,
+            title=body.title,
+            question=body.question,
+        )
+        download_filename = f"chat_{_uuid.uuid4().hex[:8]}.docx"
+        doc_path = OUTPUT_DIR / download_filename
+        with open(doc_path, "wb") as f:
+            f.write(doc_bytes)
+
+        logger.info(f"Chat export | filename={download_filename} size={len(doc_bytes)}")
+        return {
+            "download_filename": download_filename,
+            "size": len(doc_bytes),
+        }
+    except Exception as e:
+        logger.error(f"Chat export error: {e}")
+        raise HTTPException(status_code=500, detail="文档导出失败")
 
 
 def main():

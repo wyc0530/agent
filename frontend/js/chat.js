@@ -1,118 +1,209 @@
 /**
- * 聊天交互模块
- * 消息渲染、流式对话、输入处理
+ * 聊天交互模块 - 集成文件上传、问答、下载功能
  */
 var Chat = (function () {
   'use strict';
 
   var AGENT_ROLE_LABELS = {
-    'auto': '自动识别',
-    'planner': '学习规划师',
-    'expert': '学习专家',
-    'partner': '学习伙伴',
-    'quizzer': '出题官',
-    'reviewer': '复习助理',
+    'auto': '自动识别', 'planner': '学习规划师', 'expert': '学习专家',
+    'partner': '学习伙伴', 'quizzer': '出题官', 'reviewer': '复习助理',
     'examiner': '考试指导',
   };
-
-  var AVATAR_USER = 'U';       // 用户首字母
-  var AVATAR_ASSISTANT = 'AI';  // 助手标识
-  var AVATAR_SYSTEM = '!';      // 系统标识
 
   var _messagesEl = null;
   var _inputEl = null;
   var _sendBtn = null;
+  var _attachBtn = null;
+  var _fileInput = null;
+  var _attachedFiles = null;
   var _streamingMsg = null;
+  var _uploadedFiles = [];
 
-  /** 初始化聊天界面 */
+  function $(id) { return document.getElementById(id); }
+
   function initChat() {
-    _messagesEl = Utils.$('#chat-messages');
-    _inputEl = Utils.$('#chat-input');
-    _sendBtn = Utils.$('#btn-send');
+    _messagesEl = $('chat-messages');
+    _inputEl = $('chat-input');
+    _sendBtn = $('btn-send');
+    _attachBtn = $('btn-attach');
+    _fileInput = $('file-upload-input');
+    _attachedFiles = $('attached-files');
 
-    if (_sendBtn) {
-      _sendBtn.addEventListener('click', sendMessage);
-    }
+    if (_sendBtn) { _sendBtn.addEventListener('click', sendMessage); }
     if (_inputEl) {
       _inputEl.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
       });
-      // 自动调整高度
       _inputEl.addEventListener('input', function () {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 120) + 'px';
       });
     }
-
+    if (_attachBtn && _fileInput) {
+      _attachBtn.addEventListener('click', function () { _fileInput.click(); });
+      _fileInput.addEventListener('change', function () {
+        if (_fileInput.files.length > 0) { handleFileUpload(_fileInput.files[0]); }
+      });
+    }
     renderHistory();
   }
 
-  /** 渲染历史消息 */
+  function handleFileUpload(file) {
+    var allowedExts = ['.pdf', '.docx', '.doc', '.txt', '.md',
+      '.py', '.java', '.cpp', '.c', '.h', '.js', '.ts',
+      '.html', '.css', '.json', '.xml', '.yaml', '.yml', '.csv'];
+    var ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (allowedExts.indexOf(ext) === -1) {
+      Toast.show('不支持的文件格式', 'error'); return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      Toast.show('文件大小超过限制 (10MB)', 'error'); return;
+    }
+
+    if (_attachBtn) _attachBtn.classList.add('uploading');
+    showUploadProgress(true);
+    updateProgress(0, '上传中...');
+
+    ApiClient.uploadFile(file, function (pct) {
+      updateProgress(pct, '上传中 ' + pct + '%');
+    }).then(function (data) {
+      updateProgress(100, '完成');
+      showUploadProgress(false);
+      if (_attachBtn) _attachBtn.classList.remove('uploading');
+      _uploadedFiles.push({ fileId: data.file_id, name: file.name, preview: data.content_preview });
+      renderFileTags();
+      Toast.show('文件上传成功', 'success');
+    }).catch(function (err) {
+      showUploadProgress(false);
+      if (_attachBtn) _attachBtn.classList.remove('uploading');
+      Toast.show(err.message || '上传失败', 'error');
+    });
+  }
+
+  function showUploadProgress(show) {
+    var el = $('upload-progress');
+    if (el) el.classList.toggle('visible', show);
+  }
+
+  function updateProgress(pct, text) {
+    var fill = document.querySelector('.progress-fill');
+    var txt = document.querySelector('.progress-text');
+    if (fill) fill.style.width = pct + '%';
+    if (txt) txt.textContent = text || pct + '%';
+  }
+
+  function renderFileTags() {
+    if (!_attachedFiles) return;
+    _attachedFiles.innerHTML = '';
+    _uploadedFiles.forEach(function (f, i) {
+      var tag = document.createElement('span');
+      tag.className = 'attached-file-tag';
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'tag-name';
+      nameSpan.textContent = f.name;
+      var removeBtn = document.createElement('button');
+      removeBtn.className = 'tag-remove';
+      removeBtn.innerHTML = '&#x2715;';
+      removeBtn.title = '移除文件';
+      (function (idx) {
+        removeBtn.addEventListener('click', function () { removeFile(idx); });
+      })(i);
+      tag.appendChild(nameSpan);
+      tag.appendChild(removeBtn);
+      _attachedFiles.appendChild(tag);
+    });
+  }
+
+  function removeFile(index) {
+    _uploadedFiles.splice(index, 1);
+    renderFileTags();
+  }
+
   function renderHistory() {
     if (!_messagesEl) return;
     var messages = AppState.getMessages();
-
-    if (messages.length === 0) {
-      renderEmptyState();
-      return;
-    }
-
+    if (messages.length === 0) { renderEmptyState(); return; }
     _messagesEl.innerHTML = '';
-    messages.forEach(function (msg) {
-      _messagesEl.appendChild(createMessageEl(msg));
-    });
-    Utils.scrollToBottom(_messagesEl, true);
+    messages.forEach(function (msg) { _messagesEl.appendChild(createMessageEl(msg)); });
+    scrollToBottom(true);
   }
 
-  /** 空态 */
   function renderEmptyState() {
     if (!_messagesEl) return;
-    _messagesEl.innerHTML = ''
-      + '<div class="empty-state" role="status">'
-      + '<div class="icon"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2.5"/><line x1="4" y1="14" x2="44" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="16" y1="6" x2="16" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="32" y1="6" x2="32" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="20" y1="22" x2="28" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="28" x2="24" y2="28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>'
-      + '<h3>欢迎使用学习辅助系统</h3>'
-      + '<p>我是你的 AI 学习助手，可以帮你：</p>'
-      + '<ul>'
-      + '<li>制定学习计划</li>'
-      + '<li>推荐学习资料</li>'
-      + '<li>解答学习问题</li>'
-      + '<li>生成练习题目</li>'
-      + '</ul>'
-      + '<p style="margin-top:12px;font-size:0.875rem;">在左侧边栏可以选择指定的 Agent 来获得更专业的帮助。<br>试试输入你的第一个问题吧！</p>'
-      + '</div>';
+    _messagesEl.innerHTML =
+      '<div class="empty-state" role="status">' +
+      '<div class="icon"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="6" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2.5"/><line x1="4" y1="14" x2="44" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="16" y1="6" x2="16" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="32" y1="6" x2="32" y2="14" stroke="currentColor" stroke-width="2.5"/><line x1="20" y1="22" x2="28" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="28" x2="24" y2="28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>' +
+      '<h3>欢迎使用学习辅助系统</h3>' +
+      '<p>我是你的 AI 学习助手，可以帮你：</p>' +
+      '<ul>' +
+      '<li>制定学习计划</li><li>推荐学习资料</li><li>解答学习问题</li><li>生成练习题目</li>' +
+      '</ul>' +
+      '<p style="margin-top:12px;font-size:0.875rem;color:var(--color-text-secondary)">在左侧边栏可以选择 Agent 来获得更专业的帮助。<br>点击输入框左侧的 📎 按钮上传文件，针对文件内容提问。</p>' +
+      '</div>';
   }
 
-  /** 创建消息元素 */
   function createMessageEl(msg) {
     var role = msg.role || 'assistant';
-    var avatar = msg.avatar || (role === 'user' ? AVATAR_USER : AVATAR_ASSISTANT);
+    var avatar = msg.avatar || (role === 'user' ? 'U' : 'AI');
+    var msgDiv = document.createElement('div');
+    msgDiv.className = 'message ' + role;
 
-    var msgDiv = Utils.createEl('div', { className: 'message ' + role });
+    var avatarEl = document.createElement('div');
+    avatarEl.className = 'message-avatar';
+    avatarEl.textContent = avatar;
+    avatarEl.setAttribute('aria-label', role === 'user' ? '用户' : '助手');
 
-    var avatarEl = Utils.createEl('div', {
-      className: 'message-avatar',
-      textContent: avatar,
-      'aria-label': role === 'user' ? '用户' : '助手',
-    });
+    var bodyDiv = document.createElement('div');
+    bodyDiv.className = 'message-body';
 
-    var bodyDiv = Utils.createEl('div', { className: 'message-body' });
-
-    var contentEl = Utils.createEl('div', {
-      className: 'message-content',
-      innerHTML: formatContent(msg.content || ''),
-    });
+    var contentEl = document.createElement('div');
+    contentEl.className = 'message-content';
+    contentEl.innerHTML = formatContent(msg.content || '');
 
     bodyDiv.appendChild(contentEl);
 
     if (msg.agent && role !== 'user') {
-      var agentLabel = Utils.createEl('div', {
-        className: 'message-agent',
-        textContent: '处理: ' + msg.agent,
-      });
+      var agentLabel = document.createElement('div');
+      agentLabel.className = 'message-agent';
+      agentLabel.textContent = '处理: ' + msg.agent;
       bodyDiv.appendChild(agentLabel);
+    }
+
+    // 用户消息的删除按钮
+    if (role === 'user' && msg.id) {
+      (function (msgId) {
+        var actionsDiv = document.createElement('div');
+        actionsDiv.className = 'message-actions';
+        var delBtn = document.createElement('button');
+        delBtn.className = 'btn-download-msg btn-delete-msg';
+        delBtn.innerHTML = '&#x2715; 删除';
+        delBtn.title = '删除此问答记录';
+        delBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (confirm('确定要删除此问答记录吗？相应的 AI 回复也会被删除。')) {
+            deleteMessagePair(msgId, msgDiv);
+          }
+        });
+        actionsDiv.appendChild(delBtn);
+        bodyDiv.appendChild(actionsDiv);
+      })(msg.id);
+    }
+
+    if (role === 'assistant' && msg.content && msg.content.length > 0) {
+      var actionsDiv = document.createElement('div');
+      actionsDiv.className = 'message-actions';
+      var downloadBtn = document.createElement('button');
+      downloadBtn.className = 'btn-download-msg';
+      downloadBtn.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>' +
+        '</svg> 下载 Word';
+      downloadBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        downloadMessageAsWord(msg.content, msg.question || '');
+      });
+      actionsDiv.appendChild(downloadBtn);
+      bodyDiv.appendChild(actionsDiv);
     }
 
     msgDiv.appendChild(avatarEl);
@@ -120,210 +211,193 @@ var Chat = (function () {
     return msgDiv;
   }
 
-  /** 格式化内容（Markdown + Math） */
+  function downloadMessageAsWord(content, question) {
+    ApiClient.exportChatAnswer(question, content, '问答记录').then(function (data) {
+      var url = ApiClient.getDownloadUrl(data.download_filename);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = data.download_filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      Toast.show('文档下载成功', 'success');
+    }).catch(function (err) {
+      Toast.show('下载失败: ' + (err.message || '未知错误'), 'error');
+    });
+  }
+
+  function deleteMessagePair(msgId, msgEl) {
+    var convId = AppState.getConversationId();
+    if (!convId) {
+      Toast.show('无法删除：未关联对话', 'error');
+      return;
+    }
+    ApiClient.deleteMessage(convId, msgId).then(function () {
+      // 从 UI 移除用户消息及其后的 assistant 消息
+      if (msgEl && msgEl.parentNode) {
+        var nextEl = msgEl.nextElementSibling;
+        msgEl.parentNode.removeChild(msgEl);
+        // 移除紧随的 assistant 消息
+        if (nextEl && nextEl.classList.contains('assistant')) {
+          nextEl.parentNode.removeChild(nextEl);
+        }
+      }
+      // 从 AppState 中移除对应消息
+      var messages = AppState.getMessages();
+      var filtered = [];
+      var skipNext = false;
+      for (var i = 0; i < messages.length; i++) {
+        if (messages[i].id === msgId) {
+          skipNext = true;
+          continue;
+        }
+        if (skipNext && messages[i].role === 'assistant') {
+          skipNext = false;
+          continue;
+        }
+        filtered.push(messages[i]);
+      }
+      AppState.setMessages(filtered);
+      // 如果对话变空，返回到空状态
+      if (filtered.length === 0) {
+        renderEmptyState();
+        if (typeof Conversations !== 'undefined') {
+          Conversations.loadConversations();
+        }
+      }
+      Toast.show('问答记录已删除', 'success');
+    }).catch(function (err) {
+      Toast.show('删除失败: ' + (err.message || '未知错误'), 'error');
+    });
+  }
+
   function formatContent(text) {
     if (!text) return '';
-
-    var hasMath = /(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$)/.test(text);
-    var hasKaTeX = (typeof katex !== 'undefined');
-
-    // 如果有数学公式且 KaTeX 可用，先提取公式再渲染 Markdown
-    if (hasMath && hasKaTeX) {
-      return formatWithMathProtected(text);
-    }
-
-    // 纯 Markdown 渲染
     if (typeof marked !== 'undefined' && marked.parse) {
-      try {
-        return marked.parse(text);
-      } catch (e) {
-        return Utils.escapeHtml(text).replace(/\n/g, '<br>');
-      }
+      try { return marked.parse(text); }
+      catch (e) { return escapeHtml(text).replace(/\n/g, '<br>'); }
     }
-    return Utils.escapeHtml(text).replace(/\n/g, '<br>');
+    return escapeHtml(text).replace(/\n/g, '<br>');
   }
 
-  /** 保护数学公式不被 marked.js 转义，然后渲染 */
-  function formatWithMathProtected(text) {
-    var mathBlocks = [];
-    var counter = 0;
-
-    // 检测末尾是否有未闭合的 $（流式输出中公式可能尚未完整）
-    var trailing = '';
-    var mainText = text;
-    var dollarCount = (text.match(/\$/g) || []).length;
-    if (dollarCount % 2 !== 0) {
-      var lastDollar = text.lastIndexOf('$');
-      trailing = text.substring(lastDollar);
-      mainText = text.substring(0, lastDollar);
-    }
-
-    // 提取并替换所有完整数学公式为占位符
-    var protectedText = mainText
-      // 先处理块级公式 $$...$$
-      .replace(/\$\$([\s\S]*?)\$\$/g, function (match, formula) {
-        var id = 'MATH_BLOCK_' + (counter++);
-        mathBlocks.push({ id: id, formula: formula.trim(), display: true });
-        return id;
-      })
-      // 处理行内公式 $...$
-      .replace(/\$([^$\n]+?)\$/g, function (match, formula) {
-        var id = 'MATH_BLOCK_' + (counter++);
-        mathBlocks.push({ id: id, formula: formula.trim(), display: false });
-        return id;
-      });
-
-    // 尾部未闭合的公式片段：作为纯文本附加，不做 marked.js 处理
-    if (trailing) {
-      protectedText += trailing;
-    }
-
-    // 用 marked.js 渲染 Markdown（占位符不会被转义）
-    var html;
-    if (typeof marked !== 'undefined' && marked.parse) {
-      try {
-        html = marked.parse(protectedText);
-      } catch (e) {
-        html = Utils.escapeHtml(protectedText).replace(/\n/g, '<br>');
-      }
-    } else {
-      html = Utils.escapeHtml(protectedText).replace(/\n/g, '<br>');
-    }
-
-    // 将占位符替换为 KaTeX 渲染的 HTML
-    mathBlocks.forEach(function (block) {
-      try {
-        var rendered = katex.renderToString(block.formula, {
-          displayMode: block.display,
-          throwOnError: false,
-        });
-        if (block.display) {
-          rendered = '<div class="math-block">' + rendered + '</div>';
-        }
-        // 替换占位符（可能被 marked.js 包裹在 <p> 中）
-        html = html.replace(block.id, rendered);
-        // 清理可能被 marked.js 在占位符周围生成的空 <p> 标签
-        html = html.replace('<p><div class="math-block">', '<div class="math-block">');
-        html = html.replace('</div></p>', '</div>');
-      } catch (e) {
-        html = html.replace(block.id, Utils.escapeHtml('$' + block.formula + '$'));
-      }
-    });
-
-    return html;
+  function escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  /** 发送消息 */
   function sendMessage() {
     var message = (_inputEl ? _inputEl.value.trim() : '');
-    if (!message) return;
+    if (!message && _uploadedFiles.length === 0) return;
+
+    var hasFiles = _uploadedFiles.length > 0;
+    var fileIds = _uploadedFiles.map(function (f) { return f.fileId; });
+    var fileNames = _uploadedFiles.map(function (f) { return f.name; });
 
     if (_inputEl) {
       _inputEl.value = '';
       _inputEl.style.height = 'auto';
     }
 
-    // 确保存在活跃对话，否则自动创建
     var convId = AppState.getConversationId();
-    if (!convId) {
-      _sendWithNewConversation(message);
+    if (!convId && AppState.isLoggedIn()) {
+      _sendWithNewConversation(message, hasFiles, fileIds, fileNames);
       return;
     }
-    _doSendMessage(message, convId);
+    _doSendMessage(message, convId || '', hasFiles, fileIds, fileNames);
   }
 
-  /** 没有活跃对话时，先创建再发送 */
-  function _sendWithNewConversation(message) {
-    if (!AppState.isLoggedIn()) {
-      _doSendMessage(message, '');
-      return;
-    }
+  function _sendWithNewConversation(message, hasFiles, fileIds, fileNames) {
     ApiClient.createConversation('').then(function (data) {
       AppState.setConversationId(data.id);
-      if (typeof Conversations !== 'undefined') {
-        Conversations.loadConversations();
-      }
-      _doSendMessage(message, data.id);
+      if (typeof Conversations !== 'undefined') { Conversations.loadConversations(); }
+      _doSendMessage(message, data.id, hasFiles, fileIds, fileNames);
     }).catch(function () {
-      // 创建失败时仍尝试发送（不带 conversation_id）
-      _doSendMessage(message, '');
+      _doSendMessage(message, '', hasFiles, fileIds, fileNames);
     });
   }
 
-  /** 实际发送消息 */
-  function _doSendMessage(message, convId) {
+  function _doSendMessage(message, convId, hasFiles, fileIds, fileNames) {
+    var displayText = message || '';
+    if (hasFiles) {
+      var filePrefix = '[已上传文件: ' + fileNames.join(', ') + ']';
+      if (message) {
+        displayText = message + '\n\n' + filePrefix;
+      } else {
+        displayText = filePrefix + ' 请分析这些文件的内容。';
+      }
+    }
 
-    // 添加用户消息
     var userMsg = {
-      role: 'user',
-      content: message,
-      avatar: AVATAR_USER,
-      timestamp: Date.now(),
+      role: 'user', content: displayText, avatar: 'U',
+      timestamp: Date.now(), fileIds: hasFiles ? fileIds : null,
     };
     AppState.addMessage(userMsg);
 
     if (_messagesEl) {
       _messagesEl.appendChild(createMessageEl(userMsg));
-      Utils.scrollToBottom(_messagesEl, true);
+      scrollToBottom(true);
     }
 
-    // 创建流式消息占位
-    var streamingDiv = Utils.createEl('div', {
-      className: 'message assistant streaming',
-    });
-    var avatarEl = Utils.createEl('div', {
-      className: 'message-avatar',
-      textContent: AVATAR_ASSISTANT,
-    });
-    var bodyDiv = Utils.createEl('div', { className: 'message-body' });
-    var contentEl = Utils.createEl('div', {
-      className: 'message-content',
-      textContent: '',
-    });
+    _uploadedFiles = [];
+    renderFileTags();
+
+    var streamingDiv = document.createElement('div');
+    streamingDiv.className = 'message assistant streaming';
+    var avatarEl = document.createElement('div');
+    avatarEl.className = 'message-avatar';
+    avatarEl.textContent = 'AI';
+    var bodyDiv = document.createElement('div');
+    bodyDiv.className = 'message-body';
+    var contentEl = document.createElement('div');
+    contentEl.className = 'message-content streaming-waiting';
+    contentEl.innerHTML = '正在等待助手响应... <span class="dot-pulse"></span>';
     bodyDiv.appendChild(contentEl);
     streamingDiv.appendChild(avatarEl);
     streamingDiv.appendChild(bodyDiv);
 
     if (_messagesEl) {
       _messagesEl.appendChild(streamingDiv);
-      Utils.scrollToBottom(_messagesEl, false);
+      scrollToBottom(false);
     }
 
     _streamingMsg = {
-      el: streamingDiv,
-      contentEl: contentEl,
-      bodyDiv: bodyDiv,
-      fullText: '',
-      agentRole: '',
-      contentStarted: false,
+      el: streamingDiv, contentEl: contentEl, bodyDiv: bodyDiv,
+      fullText: '', agentRole: '', contentStarted: false,
     };
 
-    // 显示等待提示
-    contentEl.textContent = '';
-    contentEl.classList.add('streaming-waiting');
-    contentEl.innerHTML = '<span class="streaming-waiting">正在等待助手响应... <span class="dot-pulse"></span></span>';
+    if (hasFiles) {
+      _handleFileQuestion(message, fileIds, fileNames, convId);
+    } else {
+      _handleChatQuestion(message, convId);
+    }
+  }
 
-    // 发起 SSE 请求
+  function _handleFileQuestion(message, fileIds, fileNames, convId) {
+    var question = message || '请分析文件内容并总结要点';
+    ApiClient.askFileQuestion(fileIds[0], question, convId).then(function (data) {
+      _streamingMsg.contentStarted = true;
+      _streamingMsg.contentEl.classList.remove('streaming-waiting');
+      _streamingMsg.fullText = data.answer;
+      _streamingMsg.contentEl.innerHTML = formatContent(data.answer);
+      finalizeMessage(null, question);
+      scrollToBottom(true);
+    }).catch(function (err) {
+      finalizeMessage(err.message || '文件分析失败');
+    });
+  }
+
+  function _handleChatQuestion(message, convId) {
     var history = AppState.getMessages().slice(0, -1).map(function (m) {
       return { role: m.role, content: m.content };
     });
-
     var agentRole = AppState.getCurrentAgent() || '';
-
     var payload = {
-      message: message,
-      user_id: AppState.getUserId(),
-      conversation_id: convId,
-      history: history.slice(-20),
+      message: message, user_id: AppState.getUserId(),
+      conversation_id: convId, history: history.slice(-20),
     };
-    if (agentRole && agentRole !== 'auto') {
-      payload.agent_role = agentRole;
-    }
+    if (agentRole && agentRole !== 'auto') { payload.agent_role = agentRole; }
 
     SSE.streamChat(payload, {
-      onStart: function (data) {
-        _streamingMsg.agentRole = data.agent_role || '';
-      },
+      onStart: function (data) { _streamingMsg.agentRole = data.agent_role || ''; },
       onChunk: function (chunk) {
         if (!_streamingMsg.contentStarted) {
           _streamingMsg.contentStarted = true;
@@ -331,35 +405,22 @@ var Chat = (function () {
         }
         _streamingMsg.fullText += chunk;
         _streamingMsg.contentEl.innerHTML = formatContent(_streamingMsg.fullText);
-        Utils.smartScrollToBottom(_messagesEl, 80);
+        smartScrollToBottom(80);
       },
-      onDone: function () {
-        finalizeMessage();
-      },
-      onError: function (err) {
-        finalizeMessage(err);
-      },
+      onDone: function () { finalizeMessage(null, message); },
+      onError: function (err) { finalizeMessage(err); },
     });
   }
 
-  /** 完成消息 */
-  function finalizeMessage(errorMsg) {
+  function finalizeMessage(errorMsg, question) {
     if (!_streamingMsg) return;
-
     _streamingMsg.el.classList.remove('streaming');
 
     if (errorMsg) {
       Toast.show(errorMsg, 'error');
       _streamingMsg.contentEl.textContent = '[错误] ' + errorMsg;
-      var agentLabel = _streamingMsg.agentRole
-        ? AGENT_ROLE_LABELS[_streamingMsg.agentRole] || _streamingMsg.agentRole
-        : '系统';
       AppState.addMessage({
-        role: 'system',
-        content: '[错误] ' + errorMsg,
-        avatar: AVATAR_SYSTEM,
-        agent: agentLabel,
-        timestamp: Date.now(),
+        role: 'system', content: '[错误] ' + errorMsg, avatar: '!', timestamp: Date.now(),
       });
     } else {
       if (!_streamingMsg.fullText.trim()) {
@@ -369,35 +430,69 @@ var Chat = (function () {
       _streamingMsg.contentEl.innerHTML = formatContent(_streamingMsg.fullText);
 
       var agentLabel = _streamingMsg.agentRole
-        ? AGENT_ROLE_LABELS[_streamingMsg.agentRole] || _streamingMsg.agentRole
-        : '';
+        ? AGENT_ROLE_LABELS[_streamingMsg.agentRole] || _streamingMsg.agentRole : '';
 
-      AppState.addMessage({
-        role: 'assistant',
-        content: _streamingMsg.fullText,
-        avatar: AVATAR_ASSISTANT,
-        agent: agentLabel,
-        timestamp: Date.now(),
-      });
+      var msgObj = {
+        role: 'assistant', content: _streamingMsg.fullText, avatar: 'AI',
+        agent: agentLabel, timestamp: Date.now(),
+      };
+      if (question) { msgObj.question = question; }
+      AppState.addMessage(msgObj);
+
+      if (_messagesEl) {
+        var lastMsg = _messagesEl.lastElementChild;
+        if (lastMsg && lastMsg.classList.contains('assistant')) {
+          _messagesEl.replaceChild(createMessageEl(msgObj), lastMsg);
+        }
+      }
     }
-
     _streamingMsg = null;
+    if (typeof Conversations !== 'undefined') { Conversations.loadConversations(); }
+    // 延迟刷新消息以获取数据库 ID，使删除按钮能立即显示
+    _refreshMessagesWithIds();
+  }
 
-    // 刷新侧边栏对话列表（更新时间和消息数）
-    if (typeof Conversations !== 'undefined') {
-      Conversations.loadConversations();
+  /** 从服务端重新加载当前对话消息以获取数据库 ID */
+  function _refreshMessagesWithIds() {
+    var convId = AppState.getConversationId();
+    if (!convId) return;
+    setTimeout(function () {
+      ApiClient.getConversationMessages(convId).then(function (data) {
+        var msgs = (data.messages || []).map(function (m) {
+          return {
+            id: m.id, role: m.role, content: m.content,
+            avatar: m.role === 'user' ? 'U' : 'AI',
+            timestamp: Date.now(),
+          };
+        });
+        if (msgs.length > 0) {
+          AppState.setMessages(msgs);
+          renderHistory();
+        }
+      }).catch(function () {
+        // 静默失败，下次刷新时会自动恢复
+      });
+    }, 200); // 短暂延迟等待数据库写入完成
+  }
+
+  function scrollToBottom(instant) {
+    if (!_messagesEl) return;
+    _messagesEl.scrollTop = _messagesEl.scrollHeight;
+  }
+
+  function smartScrollToBottom(threshold) {
+    if (!_messagesEl) return;
+    var dist = _messagesEl.scrollHeight - _messagesEl.scrollTop - _messagesEl.clientHeight;
+    if (dist < (threshold || 80)) {
+      _messagesEl.scrollTop = _messagesEl.scrollHeight;
     }
   }
 
-  /** 快捷聊天 */
   function triggerQuickChat(message, agentRole) {
     AppState.setCurrentAgent(agentRole || '');
-    // 更新侧边栏 Agent 选择
     if (typeof Sidebar !== 'undefined' && Sidebar.syncAgentSelector) {
       Sidebar.syncAgentSelector(agentRole);
     }
-    sendMessage();
-    // 需要先设置输入框内容
     if (_inputEl) {
       _inputEl.value = message;
       _inputEl.style.height = 'auto';
@@ -406,10 +501,8 @@ var Chat = (function () {
   }
 
   return {
-    initChat: initChat,
-    renderHistory: renderHistory,
-    sendMessage: sendMessage,
-    triggerQuickChat: triggerQuickChat,
+    initChat: initChat, renderHistory: renderHistory,
+    sendMessage: sendMessage, triggerQuickChat: triggerQuickChat,
     AGENT_ROLE_LABELS: AGENT_ROLE_LABELS,
   };
 })();

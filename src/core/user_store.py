@@ -520,7 +520,7 @@ class UserStore:
             if not conv:
                 return None
             cursor.execute(
-                "SELECT role, content, created_at FROM conversation_messages "
+                "SELECT id, role, content, created_at FROM conversation_messages "
                 "WHERE conversation_id = %s ORDER BY id ASC",
                 (conv_id,),
             )
@@ -546,6 +546,51 @@ class UserStore:
                 (conv_id, user_id),
             )
             deleted = cursor.rowcount > 0
+            conn.commit()
+        finally:
+            cursor.close()
+            conn.close()
+        return deleted
+
+    def delete_message_pair(self, conv_id: str, msg_id: int) -> bool:
+        """删除问答对：删除指定 user 消息及其跟随的 assistant 消息"""
+        conn = self._get_conn()
+        try:
+            cursor = self._get_cursor(conn)
+            # 获取指定消息的 role
+            cursor.execute(
+                "SELECT id, role FROM conversation_messages "
+                "WHERE conversation_id = %s AND id = %s",
+                (conv_id, msg_id),
+            )
+            msg = cursor.fetchone()
+            if not msg:
+                return False
+            # 删除该消息
+            cursor.execute(
+                "DELETE FROM conversation_messages WHERE id = %s", (msg_id,)
+            )
+            deleted = cursor.rowcount > 0
+            # 如果是 user 消息，同时删除紧随其后的下一条 assistant 消息
+            if msg["role"] == "user":
+                cursor.execute(
+                    "SELECT id FROM conversation_messages "
+                    "WHERE conversation_id = %s AND id > %s AND role = 'assistant' "
+                    "ORDER BY id ASC LIMIT 1",
+                    (conv_id, msg_id),
+                )
+                next_assistant = cursor.fetchone()
+                if next_assistant:
+                    cursor.execute(
+                        "DELETE FROM conversation_messages WHERE id = %s",
+                        (next_assistant["id"],),
+                    )
+            # 更新对话时间
+            now = datetime.now().isoformat()
+            cursor.execute(
+                "UPDATE conversations SET updated_at = %s WHERE id = %s",
+                (now, conv_id),
+            )
             conn.commit()
         finally:
             cursor.close()

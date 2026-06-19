@@ -205,7 +205,6 @@ var Sidebar = (function () {
     var planBtn = Utils.$('#btn-quick-plan');
     if (planBtn) {
       planBtn.addEventListener('click', function () {
-        closeSidebar();
         var inputEl = Utils.$('#chat-input');
         if (inputEl) {
           inputEl.value = '帮我制定一个学习计划';
@@ -237,7 +236,6 @@ var Sidebar = (function () {
     var generateBtn = Utils.$('#btn-generate-quiz');
     if (generateBtn) {
       generateBtn.addEventListener('click', function () {
-        closeSidebar();
         var topic = (Utils.$('#quiz-gen-topic') || {}).value || 'Python基础';
         var count = (Utils.$('#quiz-gen-count') || {}).value || '3';
         var inputEl = Utils.$('#chat-input');

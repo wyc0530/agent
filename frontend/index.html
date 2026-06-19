@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI 驱动的学习辅助系统，提供学习规划、资料推荐、答疑解惑和测验生成等智能服务">
-  <meta name="theme-color" content="#4a5a7f">
+  <meta name="description" content="AI 驱动的学习辅助系统，支持文件上传、智能问答、文档导出">
+  <meta name="theme-color" content="#4f46e5">
   <title>学习辅助系统</title>
 
   <link rel="stylesheet" href="css/variables.css">
@@ -32,7 +32,6 @@
         <button class="auth-tab" data-tab="register" role="tab" aria-selected="false">注册</button>
       </div>
 
-      <!-- 登录表单 -->
       <form class="auth-form active" data-form="login" onsubmit="return false">
         <div class="form-group">
           <label for="login-username">用户名</label>
@@ -45,7 +44,6 @@
         <button type="button" id="btn-login" class="btn btn-primary btn-block">登录</button>
       </form>
 
-      <!-- 注册表单 -->
       <form class="auth-form" data-form="register" onsubmit="return false">
         <div class="form-group">
           <label for="reg-username">用户名 <span class="form-hint">（必填，至少3个字符）</span></label>
@@ -95,86 +93,15 @@
           <div class="sidebar-section">
             <div class="theme-toggle-row">
               <span class="theme-toggle-label">主题</span>
-              <button id="btn-theme-toggle" class="theme-toggle-btn" aria-label="切换明暗主题" title="切换明暗主题">
+              <button id="btn-theme-toggle" class="theme-toggle-btn" aria-label="切换明暗主题">
                 <svg class="theme-icon theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="5"/>
-                  <line x1="12" y1="1" x2="12" y2="3"/>
-                  <line x1="12" y1="21" x2="12" y2="23"/>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                  <line x1="1" y1="12" x2="3" y2="12"/>
-                  <line x1="21" y1="12" x2="23" y2="12"/>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                  <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
                 </svg>
                 <svg class="theme-icon theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                 </svg>
               </button>
             </div>
-          </div>
-
-          <!-- 个人设置 -->
-          <div class="sidebar-section">
-            <details class="panel" id="panel-settings">
-              <summary>个人设置</summary>
-              <div class="panel-body">
-                <button type="button" id="btn-refresh-profile" class="btn btn-ghost btn-block" style="margin-bottom:8px;">刷新信息</button>
-                <div class="settings-form">
-                  <div class="form-row">
-                    <label for="settings-display_name">昵称</label>
-                    <input type="text" id="settings-display_name" placeholder="昵称">
-                  </div>
-                  <div class="form-row">
-                    <label for="settings-email">邮箱</label>
-                    <input type="email" id="settings-email" placeholder="邮箱">
-                  </div>
-                  <div class="form-row">
-                    <label for="settings-level">当前水平</label>
-                    <select id="settings-level">
-                      <option value="beginner">入门</option>
-                      <option value="intermediate">中级</option>
-                      <option value="advanced">高级</option>
-                      <option value="expert">专家</option>
-                    </select>
-                  </div>
-                  <div class="form-row">
-                    <label for="settings-target_field">目标领域</label>
-                    <input type="text" id="settings-target_field" placeholder="例如：Python、机器学习">
-                  </div>
-                  <div class="form-row-inline">
-                    <label for="settings-available_time">每周可用时间</label>
-                    <span id="settings-time-value">10</span><span>小时</span>
-                  </div>
-                  <input type="range" id="settings-available_time" min="1" max="80" value="10">
-                  <button type="button" id="btn-save-settings" class="btn btn-primary btn-block">保存设置</button>
-                </div>
-              </div>
-            </details>
-          </div>
-
-          <!-- 修改密码 -->
-          <div class="sidebar-section">
-            <details class="panel" id="panel-password">
-              <summary>修改密码</summary>
-              <div class="panel-body">
-                <div class="settings-form">
-                  <div class="form-row">
-                    <label for="settings-old-password">原密码</label>
-                    <input type="password" id="settings-old-password" placeholder="原密码" autocomplete="current-password">
-                  </div>
-                  <div class="form-row">
-                    <label for="settings-new-password">新密码</label>
-                    <input type="password" id="settings-new-password" placeholder="新密码（至少6位）" autocomplete="new-password">
-                  </div>
-                  <div class="form-row">
-                    <label for="settings-new-password-confirm">确认新密码</label>
-                    <input type="password" id="settings-new-password-confirm" placeholder="再次输入新密码" autocomplete="new-password">
-                  </div>
-                  <button type="button" id="btn-change-password" class="btn btn-primary btn-block">修改密码</button>
-                </div>
-              </div>
-            </details>
           </div>
 
           <!-- Agent 选择器 -->
@@ -216,7 +143,7 @@
             </details>
           </div>
 
-          <!-- 历史对话（移至 Agent 选择器下方） -->
+          <!-- 历史对话 -->
           <div class="sidebar-section">
             <div class="conv-header">
               <span class="conv-header-title">历史对话</span>
@@ -228,57 +155,56 @@
           <!-- 快捷操作 -->
           <div class="sidebar-section">
             <div class="quick-actions">
-              <button type="button" id="btn-quick-plan" class="btn btn-secondary">计划</button>
-              <button type="button" id="btn-logout" class="btn btn-danger">退出</button>
+              <button type="button" id="btn-quick-plan" class="btn btn-secondary btn-sm">计划</button>
+              <button type="button" id="btn-logout" class="btn btn-danger btn-sm">退出</button>
             </div>
-          </div>
-
-          <!-- 测验生成 -->
-          <div class="sidebar-section">
-            <details class="panel" id="panel-quiz">
-              <summary>测验</summary>
-              <div class="panel-body">
-                <div class="quiz-form">
-                  <div class="form-row">
-                    <label for="quiz-gen-topic">知识点</label>
-                    <input type="text" id="quiz-gen-topic" value="Python基础" placeholder="输入知识点">
-                  </div>
-                  <div class="range-row">
-                    <label for="quiz-gen-count">题目数量</label>
-                    <span id="quiz-count-value">3</span>
-                  </div>
-                  <input type="range" id="quiz-gen-count" min="1" max="10" value="3">
-                  <button type="button" id="btn-generate-quiz" class="btn btn-primary btn-block">生成测验</button>
-                </div>
-              </div>
-            </details>
           </div>
         </div>
       </aside>
 
-      <!-- 汉堡菜单按钮（侧边栏之后，以便 CSS sibling 选择器生效） -->
+      <!-- 汉堡菜单按钮 -->
       <button id="sidebar-toggle" class="sidebar-toggle" aria-label="展开侧边栏" aria-expanded="false">
         <span class="sidebar-toggle-icon">&rarr;</span>
       </button>
 
       <!-- 主内容区 -->
       <main class="main-content" id="main-content">
-        <div class="chat-page active" id="chat-page">
-          <div class="main-header">
-            <h1>学习辅助系统</h1>
-          </div>
+        <div class="chat-container">
+          <!-- 消息区域 -->
           <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="聊天消息">
-            <!-- 动态渲染消息 -->
+            <!-- 动态渲染 -->
           </div>
+
+          <!-- 输入区域 -->
           <div class="chat-input-area">
+            <!-- 已上传文件标签 -->
+            <div class="attached-files" id="attached-files"></div>
+
+            <!-- 上传进度 -->
+            <div class="upload-progress" id="upload-progress">
+              <div class="progress-bar"><div class="progress-fill"></div></div>
+              <span class="progress-text"></span>
+            </div>
+
+            <!-- 输入行 -->
             <div class="chat-input-row">
+              <button class="btn-attach" id="btn-attach" title="上传文件" aria-label="上传文件">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+              </button>
+              <input type="file" class="upload-input" id="file-upload-input" accept=".pdf,.docx,.doc,.txt,.md,.py,.java,.cpp,.c,.h,.js,.ts,.html,.css,.json,.xml,.yaml,.yml,.csv">
               <textarea
                 id="chat-input"
                 rows="1"
-                placeholder="输入你的问题... (Enter 发送，Shift+Enter 换行)"
+                placeholder="输入你的问题，或上传文件后提问... (Enter 发送，Shift+Enter 换行)"
                 aria-label="输入消息"
               ></textarea>
-              <button id="btn-send" class="btn btn-primary btn-send" aria-label="发送消息">↑</button>
+              <button id="btn-send" class="btn btn-send" aria-label="发送消息">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -291,13 +217,13 @@
 
   <!-- JavaScript -->
   <script src="js/state.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/sse.js"></script>
-    <script src="js/toast.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/conversations.js"></script>
-    <script src="js/auth.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/sse.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/conversations.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/chat.js"></script>
   <script src="js/sidebar.js"></script>
   <script src="js/app.js"></script>
