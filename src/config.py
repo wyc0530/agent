@@ -98,6 +98,14 @@ class Settings:
     API_KEY: str = os.getenv("API_KEY", "")
     ALLOWED_ORIGIN: str = os.getenv("ALLOWED_ORIGIN", "")
 
+    # --- MySQL 数据库 ---
+    MYSQL_HOST: str = os.getenv("MYSQL_HOST", "localhost")
+    MYSQL_PORT: int = _safe_int(os.getenv("MYSQL_PORT", ""), 3306)
+    MYSQL_USER: str = os.getenv("MYSQL_USER", "root")
+    MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD", "")
+    MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE", "users")
+    MYSQL_POOL_SIZE: int = _safe_int(os.getenv("MYSQL_POOL_SIZE", ""), 5)
+
     @classmethod
     def resolve_path(cls, relative_path: str) -> Path:
         p = Path(relative_path)

@@ -241,53 +241,6 @@ _CONV_TTL_SECONDS = 7200
 _CONV_CLEANUP_INTERVAL = 600
 _last_conv_cleanup: float = 0.0
 _CONV_HISTORY_PATH = "data/conversation_history.json"
-_CONVERSATIONS_PATH = "data/conversations.json"
-_conversations: dict[str, list[dict[str, Any]]] = {}
-
-
-def _load_conversations() -> None:
-    """从磁盘加载多对话数据"""
-    import os as _os
-    global _conversations
-    try:
-        if _os.path.exists(_CONVERSATIONS_PATH):
-            with open(_CONVERSATIONS_PATH, "r", encoding="utf-8") as f:
-                _conversations = json.load(f)
-            total = sum(len(v) for v in _conversations.values())
-            if total:
-                logger.info(f"多对话数据从磁盘恢复 | conversations={total}")
-    except Exception as e:
-        logger.warning(f"多对话数据加载失败: {e}")
-
-
-def _save_conversations() -> None:
-    """保存多对话数据到磁盘"""
-    import os as _os
-    try:
-        _os.makedirs(_os.path.dirname(_CONVERSATIONS_PATH), exist_ok=True)
-        with open(_CONVERSATIONS_PATH, "w", encoding="utf-8") as f:
-            json.dump(_conversations, f, ensure_ascii=False, default=str)
-    except Exception as e:
-        logger.warning(f"多对话数据保存失败: {e}")
-
-
-def _get_user_conversations(user_id: str) -> list[dict[str, Any]]:
-    """获取用户的所有对话"""
-    if user_id not in _conversations:
-        _conversations[user_id] = []
-    return _conversations[user_id]
-
-
-def _get_conversation(user_id: str, conv_id: str) -> Optional[dict[str, Any]]:
-    """获取指定对话"""
-    for conv in _get_user_conversations(user_id):
-        if conv.get("id") == conv_id:
-            return conv
-    return None
-
-
-# 启动时加载多对话数据
-_load_conversations()
 
 
 def _load_conversation_history() -> None:
@@ -1171,18 +1124,10 @@ async def list_conversations(request: Request):
         user_id = getattr(request.state, "user_id", None)
         if not user_id:
             raise HTTPException(status_code=401, detail="请先登录")
-        convs = _get_user_conversations(user_id)
-        result = []
-        for c in convs:
-            result.append({
-                "id": c.get("id", ""),
-                "title": c.get("title", "新对话"),
-                "created_at": c.get("created_at", 0),
-                "updated_at": c.get("updated_at", 0),
-                "message_count": len(c.get("messages", [])),
-            })
-        result.sort(key=lambda x: x.get("updated_at", 0), reverse=True)
-        return {"conversations": result}
+        from src.core.user_store import get_user_store
+        store = get_user_store()
+        convs = store.list_conversations(user_id)
+        return {"conversations": convs}
     except HTTPException:
         raise
     except Exception as e:
@@ -1197,19 +1142,9 @@ async def create_conversation(body: ConversationCreateRequest, request: Request)
         user_id = getattr(request.state, "user_id", None)
         if not user_id:
             raise HTTPException(status_code=401, detail="请先登录")
-        import uuid
-        conv_id = str(uuid.uuid4())
-        now = time.time()
-        conv = {
-            "id": conv_id,
-            "title": body.title or "新对话",
-            "messages": [],
-            "created_at": now,
-            "updated_at": now,
-        }
-        _get_user_conversations(user_id).append(conv)
-        _save_conversations()
-        return {"id": conv_id, "title": conv["title"], "created_at": now, "message_count": 0}
+        from src.core.user_store import get_user_store
+        store = get_user_store()
+        return store.create_conversation(user_id, body.title)
     except HTTPException:
         raise
     except Exception as e:
@@ -1224,16 +1159,12 @@ async def get_conversation_messages(conv_id: str, request: Request):
         user_id = getattr(request.state, "user_id", None)
         if not user_id:
             raise HTTPException(status_code=401, detail="请先登录")
-        conv = _get_conversation(user_id, conv_id)
+        from src.core.user_store import get_user_store
+        store = get_user_store()
+        conv = store.get_conversation(user_id, conv_id)
         if not conv:
             raise HTTPException(status_code=404, detail="对话不存在")
-        return {
-            "id": conv["id"],
-            "title": conv.get("title", "新对话"),
-            "messages": conv.get("messages", []),
-            "created_at": conv.get("created_at", 0),
-            "updated_at": conv.get("updated_at", 0),
-        }
+        return conv
     except HTTPException:
         raise
     except Exception as e:
@@ -1248,12 +1179,11 @@ async def delete_conversation(conv_id: str, request: Request):
         user_id = getattr(request.state, "user_id", None)
         if not user_id:
             raise HTTPException(status_code=401, detail="请先登录")
-        convs = _get_user_conversations(user_id)
-        original_len = len(convs)
-        _conversations[user_id] = [c for c in convs if c.get("id") != conv_id]
-        if len(_conversations[user_id]) == original_len:
+        from src.core.user_store import get_user_store
+        store = get_user_store()
+        deleted = store.delete_conversation(user_id, conv_id)
+        if not deleted:
             raise HTTPException(status_code=404, detail="对话不存在")
-        _save_conversations()
         return {"message": "对话已删除"}
     except HTTPException:
         raise
@@ -1269,12 +1199,11 @@ async def update_conversation_title(conv_id: str, body: ConversationTitleRequest
         user_id = getattr(request.state, "user_id", None)
         if not user_id:
             raise HTTPException(status_code=401, detail="请先登录")
-        conv = _get_conversation(user_id, conv_id)
-        if not conv:
+        from src.core.user_store import get_user_store
+        store = get_user_store()
+        updated = store.update_conversation_title(user_id, conv_id, body.title)
+        if not updated:
             raise HTTPException(status_code=404, detail="对话不存在")
-        conv["title"] = body.title
-        conv["updated_at"] = time.time()
-        _save_conversations()
         return {"id": conv_id, "title": body.title}
     except HTTPException:
         raise
@@ -1284,50 +1213,71 @@ async def update_conversation_title(conv_id: str, body: ConversationTitleRequest
 
 
 def _append_to_conversation(user_id: str, conv_id: str, role: str, content: str) -> None:
-    """向指定对话追加消息"""
-    if not user_id or not conv_id or not content:
+    """向指定对话追加消息（对话不存在时自动创建）
+
+    注意：user_id 必须是经过认证的真实用户ID（request.state.user_id），
+    而非前端 payload 中的 user_id，以确保数据安全性和关联正确性。
+    """
+    if not user_id or not conv_id:
         return
-    conv = _get_conversation(user_id, conv_id)
-    if not conv:
-        return
-    conv["messages"].append({"role": role, "content": content})
-    conv["updated_at"] = time.time()
-    if len(conv["messages"]) > 500:
-        conv["messages"] = conv["messages"][-200:]
-    # 自动设置标题（取第一条用户消息的前30字）
-    if role == "user" and conv.get("title") == "新对话":
-        conv["title"] = content[:30] + ("..." if len(content) > 30 else "")
-    _save_conversations()
+    if not content:
+        if role == "assistant":
+            content = "[系统提示] 响应生成失败，请稍后重试。"
+            logger.warning(f"Assistant 响应为空，保存占位消息 | conv_id={conv_id}")
+        else:
+            return
+    try:
+        from src.core.user_store import get_user_store
+        store = get_user_store()
+        conv = store.get_conversation(user_id, conv_id)
+        if not conv:
+            # 对话不存在，自动创建（使用认证后的 user_id 确保归属正确）
+            store.create_conversation(user_id, content[:30] if role == "user" else "新对话", conv_id)
+            logger.info(f"自动创建对话 | conv_id={conv_id} user_id={user_id}")
+        store.append_message(conv_id, role, content)
+        # 自动设置标题（取第一条用户消息的前30字）
+        if role == "user":
+            conv = store.get_conversation(user_id, conv_id)
+            if conv and conv.get("title") == "新对话":
+                new_title = content[:30] + ("..." if len(content) > 30 else "")
+                store.update_conversation_title(user_id, conv_id, new_title)
+        # 裁剪消息（保留最近 200 条）
+        store.trim_conversation_messages(conv_id, max_messages=200)
+    except Exception as e:
+        logger.error(f"保存对话消息失败 | conv_id={conv_id} role={role} error={e}")
 
 
 # ===================== 聊天 API =====================
 
 @app.post("/chat/stream")
-async def chat_stream(request: ChatRequest):
+async def chat_stream(chat_req: ChatRequest, request: Request):
+    # 使用认证后的真实用户ID进行数据库操作，防止前端payload中的user_id被篡改
+    auth_user_id: str = getattr(request.state, "user_id", "") or chat_req.user_id
+
     async def generate() -> AsyncGenerator[str, None]:
         try:
-            if request.agent_role:
+            if chat_req.agent_role:
                 cache = _ensure_agents()
                 supervisor = cache["supervisor"]
                 role_map = cache["role_map"]
 
                 target_role = None
-                if request.agent_role in role_map:
-                    target_role = role_map[request.agent_role][0]
+                if chat_req.agent_role in role_map:
+                    target_role = role_map[chat_req.agent_role][0]
 
-                state = _build_agent_state(request.message, request.user_id, request.history)
+                state = _build_agent_state(chat_req.message, chat_req.user_id, chat_req.history)
 
                 try:
                     msg_list = state.get("messages", [])
                     _MAX_CONTEXT_MSGS = 50
                     if len(msg_list) > _MAX_CONTEXT_MSGS:
                         state["messages"] = msg_list[-_MAX_CONTEXT_MSGS:]
-                        if request.user_id and request.user_id in _conversation_history:
-                            _conversation_history[request.user_id]["messages"] = _conversation_history[request.user_id]["messages"][-_MAX_CONTEXT_MSGS:]
+                        if chat_req.user_id and chat_req.user_id in _conversation_history:
+                            _conversation_history[chat_req.user_id]["messages"] = _conversation_history[chat_req.user_id]["messages"][-_MAX_CONTEXT_MSGS:]
                 except Exception as e:
                     logger.warning(f"SSE对话上下文裁剪失败: {e}")
 
-                yield f"data: {json.dumps({'type': 'start', 'agent_role': request.agent_role}, ensure_ascii=False)}\n\n"
+                yield f"data: {json.dumps({'type': 'start', 'agent_role': chat_req.agent_role}, ensure_ascii=False)}\n\n"
                 await asyncio.sleep(0)
 
                 # 使用 Agent 的 system prompt 和历史记录，通过 LLM 进行真正的流式输出
@@ -1337,7 +1287,7 @@ async def chat_stream(request: ChatRequest):
                 if agent:
                     try:
                         system_prompt, user_msg, history, temperature, max_tokens = agent._build_stream_context(
-                            state, request.message
+                            state, chat_req.message
                         )
                         llm = LLMProvider()
                         if history:
@@ -1353,10 +1303,10 @@ async def chat_stream(request: ChatRequest):
                                 full_reply += chunk
                                 yield f"data: {json.dumps({'type': 'chunk', 'content': chunk}, ensure_ascii=False)}\n\n"
                     except Exception as e:
-                        logger.warning(f"Agent 流式输出失败，回退到同步模式 | role={request.agent_role} err={e}")
+                        logger.warning(f"Agent 流式输出失败，回退到同步模式 | role={chat_req.agent_role} err={e}")
                         # 回退：使用同步 agent 调用 + 分块输出
                         loop = asyncio.get_running_loop()
-                        result = await loop.run_in_executor(None, supervisor.run, state, request.message, target_role)
+                        result = await loop.run_in_executor(None, supervisor.run, state, chat_req.message, target_role)
                         full_reply = _extract_reply(result)
                         chunk_size = 50
                         for i in range(0, len(full_reply), chunk_size):
@@ -1367,64 +1317,74 @@ async def chat_stream(request: ChatRequest):
                     # 未找到对应 Agent，使用 assistant 流式输出
                     llm = LLMProvider()
                     model = llm.model
-                    history_summary = _format_conversation_context(request.user_id, max_turns=2)
+                    history_summary = _format_conversation_context(chat_req.user_id, max_turns=2)
                     system_content = (
-                        f"{request.system_prompt or '你是一个贴心的学习助手。'}\n\n"
+                        f"{chat_req.system_prompt or '你是一个贴心的学习助手。'}\n\n"
                         f"{history_summary}"
                         f"请仅回答用户的最新问题。"
                     )
                     messages = [SystemMessage(content=system_content)]
-                    messages.append(HumanMessage(content=request.message))
+                    messages.append(HumanMessage(content=chat_req.message))
                     async for chunk in model.astream(messages):
                         content = chunk.content if hasattr(chunk, "content") and isinstance(chunk.content, str) else ""
                         if content:
                             full_reply += content
                             yield f"data: {json.dumps({'type': 'chunk', 'content': content}, ensure_ascii=False)}\n\n"
 
-                _append_to_history(request.user_id, "user", request.message)
-                _append_to_history(request.user_id, "assistant", full_reply)
-                if request.conversation_id:
-                    _append_to_conversation(request.user_id, request.conversation_id, "user", request.message)
-                    _append_to_conversation(request.user_id, request.conversation_id, "assistant", full_reply)
+                if not full_reply:
+                    logger.warning(f"Agent流式响应为空 | conv_id={chat_req.conversation_id}")
+                _append_to_history(chat_req.user_id, "user", chat_req.message)
+                _append_to_history(chat_req.user_id, "assistant", full_reply)
+                if chat_req.conversation_id:
+                    _append_to_conversation(auth_user_id, chat_req.conversation_id, "user", chat_req.message)
+                    _append_to_conversation(auth_user_id, chat_req.conversation_id, "assistant", full_reply)
             else:
                 llm = LLMProvider()
                 model = llm.model
 
-                history_summary = _format_conversation_context(request.user_id, max_turns=2)
+                history_summary = _format_conversation_context(chat_req.user_id, max_turns=2)
 
                 system_content = (
-                    f"{request.system_prompt or '你是一个贴心的学习助手。'}\n\n"
+                    f"{chat_req.system_prompt or '你是一个贴心的学习助手。'}\n\n"
                     f"{history_summary}"
                     f"请仅回答用户的最新问题。"
                 )
 
                 messages = [SystemMessage(content=system_content)]
-                messages.append(HumanMessage(content=request.message))
+                messages.append(HumanMessage(content=chat_req.message))
 
                 yield f"data: {json.dumps({'type': 'start', 'agent_role': 'assistant'}, ensure_ascii=False)}\n\n"
                 await asyncio.sleep(0)
 
+                full_reply = ""
                 try:
                     async for chunk in model.astream(messages):
                         content = chunk.content if hasattr(chunk, "content") and isinstance(chunk.content, str) else ""
                         if content:
+                            full_reply += content
                             yield f"data: {json.dumps({'type': 'chunk', 'content': content}, ensure_ascii=False)}\n\n"
-                    _append_to_history(request.user_id, "user", request.message)
-                    if request.conversation_id:
-                        _append_to_conversation(request.user_id, request.conversation_id, "user", request.message)
+                    _append_to_history(chat_req.user_id, "user", chat_req.message)
+                    _append_to_history(chat_req.user_id, "assistant", full_reply)
+                    if chat_req.conversation_id:
+                        if not full_reply:
+                            logger.warning(f"非Agent流式响应为空 | conv_id={chat_req.conversation_id}")
+                        _append_to_conversation(auth_user_id, chat_req.conversation_id, "user", chat_req.message)
+                        _append_to_conversation(auth_user_id, chat_req.conversation_id, "assistant", full_reply)
                 except (ValueError, RuntimeError, TypeError, KeyError, AttributeError):
                     logger.warning("流式对话失败，回退到非流式模式")
-                    llm_response = await llm.achat(request.message, system_prompt=request.system_prompt)
+                    llm_response = await llm.achat(chat_req.message, system_prompt=chat_req.system_prompt)
                     chunk_size = 50
                     for i in range(0, len(llm_response), chunk_size):
                         chunk_text = llm_response[i:i + chunk_size]
                         yield f"data: {json.dumps({'type': 'chunk', 'content': chunk_text}, ensure_ascii=False)}\n\n"
                         await asyncio.sleep(0.02)
-                    _append_to_history(request.user_id, "user", request.message)
-                    _append_to_history(request.user_id, "assistant", llm_response)
-                    if request.conversation_id:
-                        _append_to_conversation(request.user_id, request.conversation_id, "user", request.message)
-                        _append_to_conversation(request.user_id, request.conversation_id, "assistant", llm_response)
+                    _append_to_history(chat_req.user_id, "user", chat_req.message)
+                    _append_to_history(chat_req.user_id, "assistant", llm_response)
+                    if chat_req.conversation_id:
+                        if not llm_response:
+                            logger.warning(f"非Agent回退响应为空 | conv_id={chat_req.conversation_id}")
+                        _append_to_conversation(auth_user_id, chat_req.conversation_id, "user", chat_req.message)
+                        _append_to_conversation(auth_user_id, chat_req.conversation_id, "assistant", llm_response)
 
             yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
 

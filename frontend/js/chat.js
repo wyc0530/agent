@@ -223,6 +223,36 @@ var Chat = (function () {
       _inputEl.style.height = 'auto';
     }
 
+    // 确保存在活跃对话，否则自动创建
+    var convId = AppState.getConversationId();
+    if (!convId) {
+      _sendWithNewConversation(message);
+      return;
+    }
+    _doSendMessage(message, convId);
+  }
+
+  /** 没有活跃对话时，先创建再发送 */
+  function _sendWithNewConversation(message) {
+    if (!AppState.isLoggedIn()) {
+      _doSendMessage(message, '');
+      return;
+    }
+    ApiClient.createConversation('').then(function (data) {
+      AppState.setConversationId(data.id);
+      if (typeof Conversations !== 'undefined') {
+        Conversations.loadConversations();
+      }
+      _doSendMessage(message, data.id);
+    }).catch(function () {
+      // 创建失败时仍尝试发送（不带 conversation_id）
+      _doSendMessage(message, '');
+    });
+  }
+
+  /** 实际发送消息 */
+  function _doSendMessage(message, convId) {
+
     // 添加用户消息
     var userMsg = {
       role: 'user',
@@ -283,7 +313,7 @@ var Chat = (function () {
     var payload = {
       message: message,
       user_id: AppState.getUserId(),
-      conversation_id: AppState.getConversationId(),
+      conversation_id: convId,
       history: history.slice(-20),
     };
     if (agentRole && agentRole !== 'auto') {
@@ -352,6 +382,11 @@ var Chat = (function () {
     }
 
     _streamingMsg = null;
+
+    // 刷新侧边栏对话列表（更新时间和消息数）
+    if (typeof Conversations !== 'undefined') {
+      Conversations.loadConversations();
+    }
   }
 
   /** 快捷聊天 */

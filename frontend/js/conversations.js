@@ -8,11 +8,19 @@ var Conversations = (function () {
   var _listEl = null;
   var _newBtn = null;
   var _conversations = [];
+  var _loading = false;       // 防止并发加载
+  var _loadPromise = null;    // 当前加载的 Promise
 
-  /** 格式化时间 */
+  /** 格式化时间（兼容 ISO 字符串和 Unix 时间戳） */
   function _formatTime(ts) {
     if (!ts) return '';
-    var d = new Date(ts * 1000);
+    var d;
+    if (typeof ts === 'string') {
+      d = new Date(ts);           // ISO 字符串
+    } else {
+      d = new Date(ts * 1000);    // Unix 时间戳（秒）
+    }
+    if (isNaN(d.getTime())) return '';
     var now = new Date();
     var isToday = d.toDateString() === now.toDateString();
     var hh = ('0' + d.getHours()).slice(-2);
@@ -79,15 +87,32 @@ var Conversations = (function () {
     });
   }
 
-  /** 加载对话列表 */
+  /** 加载对话列表（防并发） */
   function loadConversations() {
     if (!AppState.isLoggedIn()) return Promise.resolve();
-    return ApiClient.listConversations().then(function (data) {
+
+    // 如果正在加载，返回当前的 Promise
+    if (_loading && _loadPromise) {
+      return _loadPromise;
+    }
+
+    _loading = true;
+    _loadPromise = ApiClient.listConversations().then(function (data) {
       _conversations = data.conversations || [];
       _renderList();
-    }).catch(function () {
-      // 静默处理
+      _loading = false;
+      _loadPromise = null;
+    }).catch(function (err) {
+      console.error('[Conversations] 加载对话列表失败:', err.message || err);
+      _loading = false;
+      _loadPromise = null;
+      // 如果之前有数据，保留显示；否则显示错误提示
+      if (_conversations.length === 0 && _listEl) {
+        _listEl.innerHTML = '<div class="conv-empty" style="color:var(--color-error)">加载失败，请刷新重试</div>';
+      }
     });
+
+    return _loadPromise;
   }
 
   /** 创建新对话 */
@@ -123,17 +148,24 @@ var Conversations = (function () {
           timestamp: Date.now(),
         };
       });
+      // 检查消息完整性：统计 user 和 assistant 消息数量
+      var userCount = 0, assistantCount = 0;
+      msgs.forEach(function (m) {
+        if (m.role === 'user') userCount++;
+        if (m.role === 'assistant') assistantCount++;
+      });
+      console.log('[Conversations] 切换对话 | convId=' + convId + ' user=' + userCount + ' assistant=' + assistantCount + ' total=' + msgs.length);
+      if (userCount > 0 && assistantCount === 0) {
+        console.warn('[Conversations] 警告：该对话缺少 assistant 回复消息');
+      }
       AppState.setMessages(msgs);
       _renderList();
       if (typeof Chat !== 'undefined') {
         Chat.renderHistory();
       }
     }).catch(function (err) {
-      AppState.setMessages([]);
-      _renderList();
-      if (typeof Chat !== 'undefined') {
-        Chat.renderHistory();
-      }
+      console.error('[Conversations] 加载对话消息失败:', err.message || err);
+      // 保留现有消息，不强制清空，避免数据丢失
       if (typeof Toast !== 'undefined') {
         Toast.show('加载对话失败: ' + (err.message || '未知错误'), 'error');
       }
