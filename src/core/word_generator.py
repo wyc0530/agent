@@ -1,4 +1,4 @@
-﻿"""Word 文档生成器 - 将 Agent 回答内容转换为格式规范的 Word 文档"""
+"""Word 文档生成器 - 将 Agent 回答内容转换为格式规范的 Word 文档"""
 
 from datetime import datetime
 from io import BytesIO

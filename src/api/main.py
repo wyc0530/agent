@@ -243,6 +243,13 @@ _last_conv_cleanup: float = 0.0
 _CONV_HISTORY_PATH = "data/conversation_history.json"
 
 
+def _make_history_key(user_id: str, conversation_id: str = "") -> str:
+    """生成会话隔离的缓存键，确保不同 conversation 的上下文完全隔离。"""
+    if conversation_id:
+        return f"{user_id}:{conversation_id}"
+    return user_id
+
+
 def _load_conversation_history() -> None:
     global _conversation_history
     import os as _os
@@ -475,12 +482,13 @@ def _format_quizzer_output(output: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _format_conversation_context(user_id: str, max_turns: int = 3) -> str:
-    """将对话历史格式化为上下文摘要块，防止 LLM 重复回答历史问题。"""
+def _format_conversation_context(user_id: str, conversation_id: str = "", max_turns: int = 3) -> str:
+    """将对话历史格式化为上下文摘要块，按 conversation_id 隔离。"""
     if not user_id:
         return ""
     try:
-        history = _conversation_history.get(user_id, {}).get("messages", [])
+        key = _make_history_key(user_id, conversation_id)
+        history = _conversation_history.get(key, {}).get("messages", [])
         recent = history[-(max_turns * 2):]
         if not recent:
             return ""
@@ -570,15 +578,17 @@ def _extract_reply(result) -> str:
     return "Agent 处理完成"
 
 
-def _build_agent_state(message: str, user_id: str, frontend_history: Optional[list[dict[str, str]]] = None) -> dict[str, Any]:
-    if user_id and user_id not in _conversation_history:
-        _conversation_history[user_id] = {"messages": [], "created_at": time.time()}
+def _build_agent_state(message: str, user_id: str, frontend_history: Optional[list[dict[str, str]]] = None, conversation_id: str = "") -> dict[str, Any]:
+    """构建 Agent 状态，按 conversation_id 隔离不同会话的上下文。"""
+    key = _make_history_key(user_id, conversation_id)
+    if user_id and key not in _conversation_history:
+        _conversation_history[key] = {"messages": [], "created_at": time.time()}
         if frontend_history:
-            _conversation_history[user_id]["messages"] = frontend_history[-20:]
+            _conversation_history[key]["messages"] = frontend_history[-20:]
     if user_id:
-        _last_access[user_id] = time.time()
+        _last_access[key] = time.time()
         _cleanup_stale_conversations()
-    entry = _conversation_history.get(user_id, {})
+    entry = _conversation_history.get(key, {})
     messages = (entry.get("messages", []) if user_id else []) + [
         {"role": "user", "content": message}
     ]
@@ -586,8 +596,8 @@ def _build_agent_state(message: str, user_id: str, frontend_history: Optional[li
     _MAX_CONTEXT_BUILD = 60
     if len(messages) > _MAX_CONTEXT_BUILD:
         messages = messages[-_MAX_CONTEXT_BUILD:]
-        if user_id and user_id in _conversation_history:
-            _conversation_history[user_id]["messages"] = _conversation_history[user_id]["messages"][-_MAX_CONTEXT_BUILD:]
+        if key in _conversation_history:
+            _conversation_history[key]["messages"] = _conversation_history[key]["messages"][-_MAX_CONTEXT_BUILD:]
 
     return {
         "user_id": user_id,
@@ -622,15 +632,16 @@ def _cleanup_stale_conversations() -> None:
         logger.info(f"历史记录容量清理: 移除 {excess} 个非活跃用户")
 
 
-def _append_to_history(user_id: str, role: str, content: str) -> None:
+def _append_to_history(user_id: str, role: str, content: str, conversation_id: str = "") -> None:
     if not user_id or not content:
         return
-    if user_id not in _conversation_history:
-        _conversation_history[user_id] = {"messages": [], "created_at": time.time()}
-    _conversation_history[user_id]["messages"].append({"role": role, "content": content})
-    _last_access[user_id] = time.time()
-    if len(_conversation_history[user_id]["messages"]) > 500:
-        _conversation_history[user_id]["messages"] = _conversation_history[user_id]["messages"][-200:]
+    key = _make_history_key(user_id, conversation_id)
+    if key not in _conversation_history:
+        _conversation_history[key] = {"messages": [], "created_at": time.time()}
+    _conversation_history[key]["messages"].append({"role": role, "content": content})
+    _last_access[key] = time.time()
+    if len(_conversation_history[key]["messages"]) > 500:
+        _conversation_history[key]["messages"] = _conversation_history[key]["messages"][-200:]
     _maybe_save_history_periodically()
 
 
@@ -695,7 +706,7 @@ def _reset_agent_cache():
     logger.info("Agent实例缓存已重置")
 
 
-async def _route_with_agent(message: str, user_id: str, agent_role: str = "", timeout: float = 120.0, history: Optional[list[dict[str, str]]] = None) -> tuple[str, str]:
+async def _route_with_agent(message: str, user_id: str, agent_role: str = "", timeout: float = 120.0, history: Optional[list[dict[str, str]]] = None, conversation_id: str = "") -> tuple[str, str]:
     cache = _ensure_agents()
     supervisor = cache["supervisor"]
     role_map = cache["role_map"]
@@ -704,15 +715,16 @@ async def _route_with_agent(message: str, user_id: str, agent_role: str = "", ti
     if agent_role and agent_role in role_map:
         target_role = role_map[agent_role][0]
 
-    state = _build_agent_state(message, user_id, history)
+    state = _build_agent_state(message, user_id, history, conversation_id=conversation_id)
+    key = _make_history_key(user_id, conversation_id)
 
     try:
         msg_list = state.get("messages", [])
         _MAX_CONTEXT_MSGS = 50
         if len(msg_list) > _MAX_CONTEXT_MSGS:
             state["messages"] = msg_list[-_MAX_CONTEXT_MSGS:]
-            if user_id and user_id in _conversation_history:
-                _conversation_history[user_id]["messages"] = _conversation_history[user_id]["messages"][-_MAX_CONTEXT_MSGS:]
+            if key in _conversation_history:
+                _conversation_history[key]["messages"] = _conversation_history[key]["messages"][-_MAX_CONTEXT_MSGS:]
             logger.info(f"对话上下文裁剪 | original={len(msg_list)} cropped={_MAX_CONTEXT_MSGS}")
     except Exception as e:
         logger.warning(f"对话上下文裁剪失败: {e}")
@@ -728,18 +740,19 @@ async def _route_with_agent(message: str, user_id: str, agent_role: str = "", ti
 
     reply = _extract_reply(result)
 
-    _append_to_history(user_id, "user", message)
-    _append_to_history(user_id, "assistant", reply)
+    _append_to_history(user_id, "user", message, conversation_id=conversation_id)
+    _append_to_history(user_id, "assistant", reply, conversation_id=conversation_id)
     return reply, result.agent_role.value
 
 
 def _build_allowed_origins() -> list[str]:
     if Settings.DEBUG:
-        return ["http://localhost:8501", "http://localhost:8000", "http://127.0.0.1:8501"]
+        return ["http://localhost:8501", "http://localhost:8000", "http://127.0.0.1:8501", "null"]
     allowed = (Settings.ALLOWED_ORIGIN or "").strip()
     if allowed:
         return [f"https://{h.strip()}" for h in allowed.split(",") if h.strip()]
-    return ["http://localhost:3000"]
+    # 非生产环境：允许本地开发来源和 file:// 协议
+    return ["http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:8000", "null"]
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -861,14 +874,16 @@ async def health_check():
 async def chat(request: ChatRequest):
     try:
         if request.agent_role:
-            reply, agent_role = await _route_with_agent(request.message, request.user_id, request.agent_role, history=request.history)
+            reply, agent_role = await _route_with_agent(request.message, request.user_id, request.agent_role, history=request.history, conversation_id=request.conversation_id)
             return ChatResponse(response=reply, agent_role=agent_role)
 
         llm = LLMProvider()
-        history = _conversation_history.get(request.user_id, {}).get("messages", []) if request.user_id else []
+        conv_id = request.conversation_id
+        key = _make_history_key(request.user_id, conv_id)
+        history = _conversation_history.get(key, {}).get("messages", []) if request.user_id else []
         response = llm.chat_with_history(request.message, history, system_prompt=request.system_prompt) if history else llm.chat(request.message, system_prompt=request.system_prompt)
-        _append_to_history(request.user_id, "user", request.message)
-        _append_to_history(request.user_id, "assistant", response)
+        _append_to_history(request.user_id, "user", request.message, conversation_id=conv_id)
+        _append_to_history(request.user_id, "assistant", response, conversation_id=conv_id)
         return ChatResponse(response=response, agent_role="assistant")
     except Exception as e:
         logger.error(f"Chat error: {e}")
@@ -1277,6 +1292,8 @@ def _append_to_conversation(user_id: str, conv_id: str, role: str, content: str)
 async def chat_stream(chat_req: ChatRequest, request: Request):
     # 使用认证后的真实用户ID进行数据库操作，防止前端payload中的user_id被篡改
     auth_user_id: str = getattr(request.state, "user_id", "") or chat_req.user_id
+    conv_id = chat_req.conversation_id
+    history_key = _make_history_key(chat_req.user_id, conv_id)
 
     async def generate() -> AsyncGenerator[str, None]:
         try:
@@ -1289,15 +1306,15 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
                 if chat_req.agent_role in role_map:
                     target_role = role_map[chat_req.agent_role][0]
 
-                state = _build_agent_state(chat_req.message, chat_req.user_id, chat_req.history)
+                state = _build_agent_state(chat_req.message, chat_req.user_id, chat_req.history, conversation_id=conv_id)
 
                 try:
                     msg_list = state.get("messages", [])
                     _MAX_CONTEXT_MSGS = 50
                     if len(msg_list) > _MAX_CONTEXT_MSGS:
                         state["messages"] = msg_list[-_MAX_CONTEXT_MSGS:]
-                        if chat_req.user_id and chat_req.user_id in _conversation_history:
-                            _conversation_history[chat_req.user_id]["messages"] = _conversation_history[chat_req.user_id]["messages"][-_MAX_CONTEXT_MSGS:]
+                        if history_key in _conversation_history:
+                            _conversation_history[history_key]["messages"] = _conversation_history[history_key]["messages"][-_MAX_CONTEXT_MSGS:]
                 except Exception as e:
                     logger.warning(f"SSE对话上下文裁剪失败: {e}")
 
@@ -1341,7 +1358,7 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
                     # 未找到对应 Agent，使用 assistant 流式输出
                     llm = LLMProvider()
                     model = llm.model
-                    history_summary = _format_conversation_context(chat_req.user_id, max_turns=2)
+                    history_summary = _format_conversation_context(chat_req.user_id, conv_id, max_turns=2)
                     system_content = (
                         f"{chat_req.system_prompt or '你是一个贴心的学习助手。'}\n\n"
                         f"{history_summary}"
@@ -1357,8 +1374,8 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
 
                 if not full_reply:
                     logger.warning(f"Agent流式响应为空 | conv_id={chat_req.conversation_id}")
-                _append_to_history(chat_req.user_id, "user", chat_req.message)
-                _append_to_history(chat_req.user_id, "assistant", full_reply)
+                _append_to_history(chat_req.user_id, "user", chat_req.message, conversation_id=conv_id)
+                _append_to_history(chat_req.user_id, "assistant", full_reply, conversation_id=conv_id)
                 if chat_req.conversation_id:
                     _append_to_conversation(auth_user_id, chat_req.conversation_id, "user", chat_req.message)
                     _append_to_conversation(auth_user_id, chat_req.conversation_id, "assistant", full_reply)
@@ -1366,7 +1383,7 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
                 llm = LLMProvider()
                 model = llm.model
 
-                history_summary = _format_conversation_context(chat_req.user_id, max_turns=2)
+                history_summary = _format_conversation_context(chat_req.user_id, conv_id, max_turns=2)
 
                 system_content = (
                     f"{chat_req.system_prompt or '你是一个贴心的学习助手。'}\n\n"
@@ -1387,8 +1404,8 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
                         if content:
                             full_reply += content
                             yield f"data: {json.dumps({'type': 'chunk', 'content': content}, ensure_ascii=False)}\n\n"
-                    _append_to_history(chat_req.user_id, "user", chat_req.message)
-                    _append_to_history(chat_req.user_id, "assistant", full_reply)
+                    _append_to_history(chat_req.user_id, "user", chat_req.message, conversation_id=conv_id)
+                    _append_to_history(chat_req.user_id, "assistant", full_reply, conversation_id=conv_id)
                     if chat_req.conversation_id:
                         if not full_reply:
                             logger.warning(f"非Agent流式响应为空 | conv_id={chat_req.conversation_id}")
@@ -1402,8 +1419,8 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
                         chunk_text = llm_response[i:i + chunk_size]
                         yield f"data: {json.dumps({'type': 'chunk', 'content': chunk_text}, ensure_ascii=False)}\n\n"
                         await asyncio.sleep(0.02)
-                    _append_to_history(chat_req.user_id, "user", chat_req.message)
-                    _append_to_history(chat_req.user_id, "assistant", llm_response)
+                    _append_to_history(chat_req.user_id, "user", chat_req.message, conversation_id=conv_id)
+                    _append_to_history(chat_req.user_id, "assistant", llm_response, conversation_id=conv_id)
                     if chat_req.conversation_id:
                         if not llm_response:
                             logger.warning(f"非Agent回退响应为空 | conv_id={chat_req.conversation_id}")

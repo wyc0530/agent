@@ -782,3 +782,140 @@ docker run -d -p 80:80 -v $(pwd)/frontend:/usr/share/nginx/html:ro nginx:alpine
 | [测试报告](.trae/documents/TEST_REPORT.md) | 前端 66 个测试用例完整报告 |
 | [使用手册](.trae/documents/USER_MANUAL.md) | 用户操作指南：快速入门、界面介绍、功能使用 |
 | [http://localhost:8000/docs](http://localhost:8000/docs) | Swagger API 交互文档（需启动服务） |
+
+---
+
+## 代码仓库文件清单
+
+以下为需上传至代码仓库的完整文件与目录列表，所有冗余文件（编译产物、依赖包、IDE 配置、运行时数据）已排除。
+
+### 根目录文件
+
+| 文件 | 说明 | 处理规范 |
+|------|------|---------|
+| `.env.example` | 环境变量模板（40+ 配置项） | 不含真实密钥，可安全提交 |
+| `.gitignore` | Git 忽略规则 | 已配置 Python/Node/IDE/Data/环境变量 排除 |
+| `Dockerfile` | 多阶段 Docker 构建（Python 3.11） | 生产构建，含非 root 用户 + 健康检查 |
+| `docker-compose.yml` | 服务编排（API + Qdrant + Neo4j） | Neo4j 使用 `full` profile 按需启动 |
+| `README.md` | 项目主文档 | 本文件 |
+| `PRODUCT.md` | 产品定位与品牌人格 | 静态文档 |
+| `DESIGN.md` | 设计系统规范 | 静态文档 |
+| `开发流程.md` | 开发流程与架构设计决策 | 中文文档 |
+| `git开发手册.md` | Git 团队协作规范 | 中文文档 |
+| `requirements.txt` | Python 依赖清单 | 含版本下限，按类别分组 |
+| `test_upload.py` | 文件上传测试脚本（7 场景） | 开发工具，需服务器运行 |
+| `check_messages.py` | 数据库消息诊断脚本 | 运维工具，需 MySQL 连接 |
+| `fix_broken_conversation.py` | 修复不完整对话记录 | 运维工具，需 MySQL 连接 |
+
+### 后端源码 (`src/`)
+
+| 路径 | 说明 | 处理规范 |
+|------|------|---------|
+| `src/__init__.py` | 包初始化 | - |
+| `src/config.py` | 全局配置（基于 pydantic-settings） | 含 40+ 环境变量，无硬编码密钥 |
+| `src/llm.py` | LLM 统一调用层 | 多 Provider 支持 + 流式/非流式 |
+| `src/embedding.py` | 向量嵌入层 | 云端 + 本地双模式 + 批量缓存 |
+| `src/api/__init__.py` | API 包初始化 | - |
+| `src/api/main.py` | FastAPI 服务（28 端点 + SSE + 中间件） | 最大文件，含全部 5 层中间件 |
+| `src/agents/__init__.py` | Agent 模块初始化 | - |
+| `src/agents/base_agent.py` | Agent 基类 | - |
+| `src/agents/assistant.py` | Supervisor 总控 Agent | 关键词 + LLM 语义路由 |
+| `src/agents/planner.py` | 学习规划师 | Plan-and-Solve |
+| `src/agents/expert.py` | 学习专家 | ReAct + WebSearch |
+| `src/agents/partner.py` | 学习伙伴 | RAG + FocusTimer |
+| `src/agents/quizzer.py` | 出题助手 | QuizGen + RL |
+| `src/agents/reviewer.py` | 错题分析师 | Reflection |
+| `src/agents/examiner.py` | 备考顾问 | Plan-and-Solve |
+| `src/core/__init__.py` | Core 包初始化 | - |
+| `src/core/state.py` | 全局状态定义 | AgentState / UserProfile |
+| `src/core/memory.py` | 向量存储 | Qdrant 本地/远程双模式 |
+| `src/core/retriever.py` | 检索层 | RAG 混合检索 |
+| `src/core/graph.py` | 知识图谱 | Neo4j + Cypher 注入防护 |
+| `src/core/communication.py` | Agent 间通信 | 消息路由与聚合 |
+| `src/core/checkpoint.py` | 对话存档 | JSON 持久化 + 自动恢复 |
+| `src/core/user_store.py` | 用户管理 | MySQL 连接池 + 对话历史 CRUD + PBKDF2 密码哈希 |
+| `src/core/file_processor.py` | 文件处理 | 上传/解析/存储，支持 PDF/Word/TXT/代码 |
+| `src/core/word_generator.py` | Word 文档生成器 | 问答导出 + 文件问答下载 |
+| `src/core/tools/__init__.py` | 工具包初始化 | - |
+| `src/core/tools/base.py` | 工具基类 + ToolRegistry | 注册中心 |
+| `src/core/tools/search.py` | Web 搜索工具 | SerpAPI / DuckDuckGo |
+| `src/core/tools/timer.py` | 专注计时器 | - |
+| `src/core/tools/document.py` | 文档生成器 | Word 文档 |
+| `src/core/tools/quiz.py` | 出题引擎 + 能力评估 | - |
+
+### 前端源码 (`frontend/`)
+
+| 路径 | 说明 | 处理规范 |
+|------|------|---------|
+| `frontend/index.html` | SPA 主入口 | 纯 HTML，含无障碍 ARIA 标签 |
+| `frontend/package.json` | 前端依赖管理 | 仅含 vitest + jsdom（测试用） |
+| `frontend/vitest.config.js` | 前端测试配置 | - |
+| `frontend/css/variables.css` | CSS 自定义属性 | 色彩/字体/间距/圆角 |
+| `frontend/css/base.css` | 全局重置与基础样式 | - |
+| `frontend/css/layout.css` | 页面布局 | 栅格 + Flex |
+| `frontend/css/auth.css` | 登录/注册卡片 | - |
+| `frontend/css/chat.css` | 聊天消息与输入区域 | 含文件上传进度条样式 |
+| `frontend/css/sidebar.css` | 侧边栏组件 | - |
+| `frontend/css/responsive.css` | 响应式适配 + 暗色模式 | - |
+| `frontend/js/state.js` | 全局状态管理 | localStorage + sessionStorage |
+| `frontend/js/utils.js` | 工具函数 | DOM 操作/表单校验/防抖/HTML 转义 |
+| `frontend/js/api.js` | API 客户端 | 统一封装 REST 调用 + XHR 文件上传 |
+| `frontend/js/sse.js` | SSE 流式请求 | fetch + ReadableStream |
+| `frontend/js/toast.js` | 消息提示 | info/success/error/warning |
+| `frontend/js/theme.js` | 主题切换 | 明暗模式 + 系统偏好跟随 |
+| `frontend/js/auth.js` | 认证模块 | 登录/注册/退出/密码修改 |
+| `frontend/js/conversations.js` | 对话管理 | 创建/切换/删除/重命名/列表加载 |
+| `frontend/js/chat.js` | 聊天交互 | 消息渲染/SSE 流式/文件上传/进度显示/Markdown 解析 |
+| `frontend/js/sidebar.js` | 侧边栏模块 | 用户信息/设置/Agent 选择/快捷操作 |
+| `frontend/js/app.js` | 应用入口 | 路由管理/初始化 |
+| `frontend/tests/setup.js` | 前端测试环境初始化 | DOM Mock |
+| `frontend/tests/state.test.js` | 状态管理测试 | 15 用例 |
+| `frontend/tests/utils.test.js` | 工具函数测试 | 16 用例 |
+| `frontend/tests/api.test.js` | API 客户端测试 | 4 用例 |
+| `frontend/tests/sse.test.js` | SSE 解析测试 | 6 用例 |
+| `frontend/tests/toast.test.js` | 消息提示测试 | 7 用例 |
+| `frontend/tests/auth.test.js` | 认证模块测试 | 3 用例 |
+| `frontend/tests/chat.test.js` | 聊天模块测试 | 5 用例 |
+| `frontend/tests/sidebar.test.js` | 侧边栏测试 | 10 用例 |
+
+### 后端测试 (`tests/`)
+
+| 路径 | 说明 | 处理规范 |
+|------|------|---------|
+| `tests/__init__.py` | 测试包初始化 | - |
+| `tests/conftest.py` | 全局测试夹具 | Fixtures |
+| `tests/test_core.py` | 基础设施测试 | Config/LLM/Embedding/Tools |
+| `tests/test_agents.py` | Agent 模块测试 | 7 个 Agent 初始化与调用 |
+| `tests/test_coverage_boost.py` | 覆盖率补充测试 | - |
+| `tests/test_e2e.py` | 端到端测试 | 完整学习流程 |
+| `tests/test_context_aware.py` | 上下文感知测试 | - |
+| `tests/test_phase5.py` | Phase 5 安全加固测试 | - |
+
+### 项目文档 (`.trae/documents/`)
+
+| 路径 | 说明 | 处理规范 |
+|------|------|---------|
+| `.trae/documents/PRD.md` | 产品需求文档 | 位于 IDE 目录，属项目文档 |
+| `.trae/documents/TECHNICAL_ARCHITECTURE.md` | 技术架构文档 | 位于 IDE 目录，属项目文档 |
+| `.trae/documents/DEPLOYMENT_GUIDE.md` | 部署指南 | 位于 IDE 目录，属项目文档 |
+| `.trae/documents/COMPONENT_DOCUMENTATION.md` | 前端组件文档 | 位于 IDE 目录，属项目文档 |
+| `.trae/documents/TEST_REPORT.md` | 测试报告 | 位于 IDE 目录，属项目文档 |
+| `.trae/documents/USER_MANUAL.md` | 用户使用手册 | 位于 IDE 目录，属项目文档 |
+
+### 排除清单（以下文件/目录不提交至仓库）
+
+| 路径 | 排除原因 | 对应 .gitignore 规则 |
+|------|---------|---------------------|
+| `.env` / `*.env` | 含真实密钥，安全风险 | `*.env` |
+| `data/` | 运行时数据（上传文件/输出文档/向量库/存档） | `data/*.json` + `data/qdrant_store/` + `data/checkpoints/` |
+| `__pycache__/` | Python 编译缓存 | `__pycache__/` + `*.pyc` |
+| `node_modules/` | 前端依赖，可通过 `npm install` 恢复 | `node_modules/` |
+| `package-lock.json` | 自动生成的锁文件 | `package-lock.json` |
+| `.pytest_cache/` | 测试缓存 | `.pytest_cache/` |
+| `.coverage` / `htmlcov/` | 覆盖率报告 | `.coverage` + `htmlcov/` |
+| `.vscode/` / `.idea/` | IDE 个人配置 | `.vscode/` + `.idea/` |
+| `models/` | 本地模型文件（体积大） | `models/` |
+| `venv/` / `env/` | Python 虚拟环境 | `venv/` + `env/` |
+| `*.log` / `logs/` | 日志文件 | `*.log` + `logs/` |
+| `build/` / `dist/` / `*.egg-info/` | Python 构建产物 | `build/` + `dist/` + `*.egg-info/` |
+| `.DS_Store` / `Thumbs.db` | 操作系统临时文件 | `.DS_Store` + `Thumbs.db` |

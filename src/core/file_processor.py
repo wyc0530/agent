@@ -1,4 +1,4 @@
-﻿﻿"""文件处理模块 - 支持 PDF、Word、TXT 等文件的解析与内容提取"""
+"""文件处理模块 - 支持 PDF、Word、TXT 等文件的解析与内容提取"""
 
 import uuid
 from datetime import datetime

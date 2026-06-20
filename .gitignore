@@ -41,6 +41,8 @@ agent-env/
 data/qdrant_store/
 data/vector_store/
 data/checkpoints/
+data/uploads/
+data/outputs/
 data/*.json
 *.db
 *.sqlite

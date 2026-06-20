@@ -52,6 +52,7 @@ var ApiClient = (function () {
   function ApiError(message, statusCode) {
     this.message = message;
     this.statusCode = statusCode || 0;
+    this.status = this.statusCode;
   }
   ApiError.prototype = Object.create(Error.prototype);
   ApiError.prototype.constructor = ApiError;

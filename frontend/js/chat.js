@@ -52,12 +52,18 @@ var Chat = (function () {
     var allowedExts = ['.pdf', '.docx', '.doc', '.txt', '.md',
       '.py', '.java', '.cpp', '.c', '.h', '.js', '.ts',
       '.html', '.css', '.json', '.xml', '.yaml', '.yml', '.csv'];
-    var ext = '.' + file.name.split('.').pop().toLowerCase();
+    // 处理无扩展名或只有扩展名的边界情况
+    var nameParts = file.name.split('.');
+    var ext = nameParts.length > 1 ? '.' + nameParts.pop().toLowerCase() : '';
     if (allowedExts.indexOf(ext) === -1) {
-      Toast.show('不支持的文件格式', 'error'); return;
+      Toast.show('不支持的文件格式: ' + ext + '，支持的格式: PDF, Word, TXT, 代码文件等', 'error');
+      _resetFileInput();
+      return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      Toast.show('文件大小超过限制 (10MB)', 'error'); return;
+      Toast.show('文件大小超过限制 (最大 10MB)，当前文件: ' + (file.size / 1024 / 1024).toFixed(1) + 'MB', 'error');
+      _resetFileInput();
+      return;
     }
 
     if (_attachBtn) _attachBtn.classList.add('uploading');
@@ -72,12 +78,22 @@ var Chat = (function () {
       if (_attachBtn) _attachBtn.classList.remove('uploading');
       _uploadedFiles.push({ fileId: data.file_id, name: file.name, preview: data.content_preview });
       renderFileTags();
-      Toast.show('文件上传成功', 'success');
+      _resetFileInput();
+      Toast.show('文件上传成功: ' + file.name, 'success');
     }).catch(function (err) {
       showUploadProgress(false);
       if (_attachBtn) _attachBtn.classList.remove('uploading');
-      Toast.show(err.message || '上传失败', 'error');
+      _resetFileInput();
+      var errMsg = err.message || '上传失败';
+      if (err.status === 413) { errMsg = '文件过大，请选择小于 10MB 的文件'; }
+      else if (err.status === 400) { errMsg = '文件格式不支持或文件为空'; }
+      else if (err.status === 0) { errMsg = '网络连接失败，请检查服务器是否启动'; }
+      Toast.show(errMsg, 'error');
     });
+  }
+
+  function _resetFileInput() {
+    if (_fileInput) { _fileInput.value = ''; }
   }
 
   function showUploadProgress(show) {
@@ -381,6 +397,8 @@ var Chat = (function () {
       finalizeMessage(null, question);
       scrollToBottom(true);
     }).catch(function (err) {
+      _streamingMsg.contentEl.classList.remove('streaming-waiting');
+      _streamingMsg.contentEl.innerHTML = '<span class="error-text">文件问答失败: ' + (err.message || '未知错误') + '</span>';
       finalizeMessage(err.message || '文件分析失败');
     });
   }
