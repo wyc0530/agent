@@ -170,3 +170,33 @@
 .chat-page.active {
   display: flex;
 }
+
+/* 聊天页顶部导航栏 */
+.chat-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 var(--space-5);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.chat-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.chat-topbar-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.chat-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

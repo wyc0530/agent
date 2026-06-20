@@ -31,6 +31,15 @@
     right: var(--space-4);
     max-width: none;
   }
+
+  /* 顶栏移动端适配 */
+  .chat-topbar {
+    height: 48px;
+    padding: 0 var(--space-4);
+  }
+  .chat-topbar-title {
+    font-size: var(--text-sm);
+  }
 }
 
 /* 小屏手机 */
