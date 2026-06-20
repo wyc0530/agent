@@ -59,7 +59,8 @@
 - **知识图谱**：Neo4j（带 Cypher 注入防护）
 - **MySQL 用户系统**：用户注册/登录（PBKDF2 密码哈希）、个人信息管理、对话历史持久化
 - **Web 搜索**：SerpAPI + DuckDuckGo + 课程目录回退
-- **文档生成**：支持 Word 文档生成与下载
+- **文件处理**：支持 PDF/Word/TXT/代码文件上传与解析，上传进度追踪，前端双重校验
+- **文档生成**：支持 Word 文档生成与下载，文件问答内容导出
 - **测验引擎**：出题生成 + 能力评估 + 自适应难度调整
 - **专注计时器**：记录用户学习时长
 - **上下文感知对话**：对话历史摘要压缩 + 边界指令，防止重复回答
@@ -68,6 +69,7 @@
 - **对话历史管理**：MySQL 持久化存储，支持创建/切换/删除/重命名对话，完整展示用户提问与 AI 回复
 - **响应式前端**：桌面/平板/手机三端适配，明暗主题切换，WCAG 2.1 AA 无障碍标准
 - **容器化部署**：Dockerfile 多阶段构建 + docker-compose 服务编排
+- **使用指南页面**：独立 guide.html 页面，含功能概述/快速上手/操作指南/FAQ/注意事项
 
 ---
 
@@ -99,6 +101,8 @@
 │   │   ├── communication.py        # Agent 间通信（消息路由与聚合）
 │   │   ├── checkpoint.py           # 对话存档（JSON 持久化 + 自动恢复）
 │   │   ├── user_store.py           # 用户管理（MySQL 连接池 + 对话历史 CRUD）
+│   │   ├── file_processor.py       # 文件处理（上传/解析/存储，支持 PDF/Word/TXT/代码）
+│   │   ├── word_generator.py       # Word 文档生成器（问答导出 + 文件问答下载）
 │   │   └── tools/                  # 工具库
 │   │       ├── __init__.py         # 工具模块初始化
 │   │       ├── base.py             # 工具基类 + ToolRegistry 注册中心
@@ -109,30 +113,32 @@
 │   │
 │   └── api/                        # API 服务层
 │       ├── __init__.py             # 模块初始化
-│       └── main.py                 # FastAPI 服务（23 个端点 + SSE 流式 + 中间件）
+│       └── main.py                 # FastAPI 服务（28 个端点 + SSE 流式 + 中间件）
 │
 ├── frontend/                       # 前端（HTML/CSS/JS SPA）
 │   ├── index.html                  # 主入口，SPA 单页面
+│   ├── guide.html                  # 使用指南页面（功能概述/操作指南/FAQ/注意事项）
 │   ├── package.json                # 前端依赖管理
 │   ├── vitest.config.js            # 前端测试配置
-│   ├── css/                        # 样式表（7 个文件）
+│   ├── css/                        # 样式表（8 个文件）
 │   │   ├── variables.css           # CSS 自定义属性（色彩/字体/间距/圆角）
 │   │   ├── base.css                # 全局重置与基础样式
 │   │   ├── layout.css              # 页面布局（栅格 + Flex）
 │   │   ├── auth.css                # 登录/注册卡片
 │   │   ├── chat.css                # 聊天消息与输入区域
 │   │   ├── sidebar.css             # 侧边栏组件
+│   │   ├── guide.css               # 指南页面样式（响应式 + 暗色模式）
 │   │   └── responsive.css          # 响应式适配 + 暗色模式
 │   ├── js/                         # JavaScript 模块（11 个文件）
 │   │   ├── state.js                # 全局状态管理（localStorage + sessionStorage）
 │   │   ├── utils.js                # 工具函数（DOM 操作/表单校验/防抖/HTML 转义）
-│   │   ├── api.js                  # API 客户端（统一封装 REST 调用）
+│   │   ├── api.js                  # API 客户端（统一封装 REST 调用 + XHR 文件上传）
 │   │   ├── sse.js                  # SSE 流式请求（fetch + ReadableStream）
 │   │   ├── toast.js                # 消息提示（info/success/error/warning）
 │   │   ├── theme.js                # 主题切换（明暗模式 + 系统偏好跟随）
 │   │   ├── auth.js                 # 认证模块（登录/注册/退出/密码修改）
 │   │   ├── conversations.js        # 对话管理（创建/切换/删除/重命名/列表加载）
-│   │   ├── chat.js                 # 聊天交互（消息渲染/SSE 流式更新/Markdown 解析）
+│   │   ├── chat.js                 # 聊天交互（消息渲染/SSE 流式/Markdown 解析/文件上传/进度显示）
 │   │   ├── sidebar.js              # 侧边栏模块（用户信息/设置/Agent 选择/快捷操作）
 │   │   └── app.js                  # 应用入口（路由管理/初始化）
 │   └── tests/                      # 前端测试（9 个文件）
@@ -252,6 +258,7 @@ python -m http.server 3000
 - **API 文档**：http://localhost:8000/docs
 - **健康检查**：http://localhost:8000/health
 - **前端界面**：http://localhost:3000
+- **使用指南**：http://localhost:3000/guide.html
 
 ---
 
@@ -325,7 +332,7 @@ python -m http.server 3000
 
 ## API 接口
 
-系统提供 **23 个 API 端点**，覆盖 Agent 调用、LLM 对话、工具执行、记忆检索、知识图谱、用户管理、对话管理等全部功能。
+系统提供 **28 个 API 端点**，覆盖 Agent 调用、LLM 对话、工具执行、记忆检索、知识图谱、用户管理、对话管理、文件处理等全部功能。
 
 ### Agent 调用
 
@@ -333,6 +340,7 @@ python -m http.server 3000
 |------|------|------|
 | `POST` | `/chat` | 非流式对话（同步响应） |
 | `POST` | `/chat/stream` | SSE 流式对话（支持上下文感知 + 断点续聊） |
+| `POST` | `/chat/export` | 导出对话内容为 Word 文档 |
 | `POST` | `/search` | Web 搜索 |
 | `POST` | `/embed` | 文本向量嵌入 |
 
@@ -373,6 +381,15 @@ python -m http.server 3000
 | `GET` | `/conversations/{conv_id}` | 获取对话详情（含消息列表） |
 | `PUT` | `/conversations/{conv_id}/title` | 重命名对话标题 |
 | `DELETE` | `/conversations/{conv_id}` | 删除对话 |
+| `DELETE` | `/conversations/{conv_id}/messages/{msg_id}` | 删除对话中的单条消息 |
+
+### 文件处理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| `POST` | `/file/upload` | 上传文件并解析内容（支持 PDF/Word/TXT/代码） |
+| `POST` | `/file/ask` | 基于已上传文件内容进行问答 |
+| `GET` | `/file/download/{filename}` | 下载生成的 Word 文档 |
 
 访问 http://localhost:8000/docs 查看完整 Swagger 交互文档。
 
@@ -380,7 +397,7 @@ python -m http.server 3000
 
 ## 前端交互层
 
-前端采用纯 HTML/CSS/JavaScript 技术栈，模块化组件架构，通过 [frontend/js/api.js](frontend/js/api.js) 统一封装后端 API 调用。主入口 [frontend/index.html](frontend/index.html) 为 SPA 单页面应用。
+前端采用纯 HTML/CSS/JavaScript 技术栈，模块化组件架构，通过 [frontend/js/api.js](frontend/js/api.js) 统一封装后端 API 调用。主入口 [frontend/index.html](frontend/index.html) 为 SPA 单页面应用，[frontend/guide.html](frontend/guide.html) 为独立使用指南页面。
 
 ### 模块依赖关系
 
@@ -404,13 +421,13 @@ app.js (入口)
 |------|------|------|
 | 状态管理 | `state.js` | 全局状态（认证/消息/资料/Agent/对话），localStorage + sessionStorage 持久化 |
 | 工具函数 | `utils.js` | DOM 操作、表单校验、HTML 转义、防抖节流、JSON 安全解析 |
-| API 客户端 | `api.js` | 封装所有 REST API 调用（认证/用户/对话/聊天/SSE） |
+| API 客户端 | `api.js` | 封装所有 REST API 调用（认证/用户/对话/聊天/文件上传/SSE） |
 | SSE 流式 | `sse.js` | 基于 fetch + ReadableStream 实现 POST SSE 流式对话 |
 | 消息提示 | `toast.js` | 浮动 Toast 通知（info/success/error/warning） |
 | 主题切换 | `theme.js` | 明暗主题切换，支持系统偏好跟随与 localStorage 持久化 |
 | 认证模块 | `auth.js` | 登录/注册/退出/密码修改交互流程 |
 | 对话管理 | `conversations.js` | 对话创建/切换/删除/重命名/列表加载，消息完整性校验 |
-| 聊天模块 | `chat.js` | 消息渲染、SSE 流式更新、Markdown + KaTeX 解析、快捷触发 |
+| 聊天模块 | `chat.js` | 消息渲染、SSE 流式更新、Markdown + KaTeX 解析、文件上传与进度显示、快捷触发 |
 | 侧边栏 | `sidebar.js` | 用户信息、设置表单、Agent 选择器、测验生成、快捷操作 |
 | 应用入口 | `app.js` | 路由管理（#login/#chat）、初始化、鉴权守卫 |
 
@@ -607,8 +624,9 @@ docker run -d -p 80:80 -v $(pwd)/frontend:/usr/share/nginx/html:ro nginx:alpine
 | **Phase 1** | 基础设施层（Config / LLM / Embedding / State / Memory / Retriever / Graph / Tools / Communication / Checkpoint / API） | 完成 |
 | **Phase 2** | Agent 模块层（Planner / Expert / Partner / Quizzer / Reviewer / Examiner / Supervisor） | 完成 |
 | **Phase 3** | 前端交互层（HTML/CSS/JS SPA 组件化架构 + SSE 流式对话 + 响应式适配） | 完成 |
-| **Phase 4** | 测试与部署（Docker + 290+ 后端测试 + 66 前端测试 + E2E） | 完成 |
+| **Phase 4** | 测试与部署（Docker + 308 后端测试 + 66 前端测试 + E2E） | 完成 |
 | **Phase 5** | 安全加固 + 上下文工程（CSRF / LLM 语义路由 / 上下文感知对话 / 断点续聊 / 对话历史管理） | 完成 |
+| **Phase 6** | 文件处理系统（上传/解析/存储/问答 + Word 文档生成与导出 + 使用指南页面） | 完成 |
 
 ---
 
@@ -666,7 +684,7 @@ docker run -d -p 80:80 -v $(pwd)/frontend:/usr/share/nginx/html:ro nginx:alpine
 
 ## 安全措施
 
-- API 错误消息去敏化（23 个端点均返回安全泛化消息）
+- API 错误消息去敏化（28 个端点均返回安全泛化消息）
 - XSS 防护（HTML/CSS/JS 前端内置 HTML 转义）
 - CSRF 防护（Origin/Referer 精确域名白名单校验）
 - 认证暴力破解防护（登录/注册独立频率限制：10 次/5 分钟）
@@ -688,19 +706,29 @@ docker run -d -p 80:80 -v $(pwd)/frontend:/usr/share/nginx/html:ro nginx:alpine
 | 包 | 版本 | 用途 |
 |---|------|------|
 | `langgraph` | >=1.2.0 | Agent 编排框架 |
+| `langgraph-checkpoint` | >=4.1.0 | 断点续聊检查点 |
+| `langgraph-prebuilt` | >=1.1.0 | 预构建 Agent 组件 |
+| `langchain-core` | >=1.4.0 | LangChain 核心库 |
 | `langchain-openai` | >=1.2.0 | OpenAI 集成 |
-| `langchain-core` | >=0.3.0 | LangChain 核心库 |
+| `langsmith` | >=0.8.0 | LLM 调试与追踪 |
 | `openai` | >=2.32.0 | LLM API 客户端 |
+| `tiktoken` | >=0.13.0 | Token 计数 |
+| `dashscope` | >=1.20.0 | 百炼 Embedding |
 | `qdrant-client` | >=1.16.0 | 向量数据库客户端 |
 | `neo4j` | >=5.0.0 | 图数据库（可选） |
+| `numpy` | >=2.0.0 | 数值计算 |
 | `mysql-connector-python` | >=9.0.0 | MySQL 数据库驱动 |
 | `fastapi` | >=0.136.0 | Web API 框架 |
 | `uvicorn` | >=0.47.0 | ASGI 服务器 |
 | `pydantic` | >=2.13.0 | 数据验证 |
 | `pydantic-settings` | >=2.0.0 | 环境变量管理 |
-| `python-dotenv` | >=1.0.0 | .env 文件加载 |
-| `httpx` | >=0.27.0 | HTTP 客户端 |
+| `python-dotenv` | >=1.2.0 | .env 文件加载 |
+| `beautifulsoup4` | >=4.14.0 | HTML 解析（Web 搜索） |
+| `requests` | >=2.33.0 | HTTP 客户端 |
+| `PyPDF2` | >=3.0.0 | PDF 文件解析 |
+| `python-docx` | >=1.1.0 | Word 文档生成与读取 |
 | `pytest` | >=8.0.0 | 测试框架 |
+| `pytest-asyncio` | >=1.0.0 | 异步测试支持 |
 | `pytest-cov` | >=5.0.0 | 测试覆盖率 |
 
 ### 前端开发依赖
@@ -847,16 +875,18 @@ docker run -d -p 80:80 -v $(pwd)/frontend:/usr/share/nginx/html:ro nginx:alpine
 
 | 路径 | 说明 | 处理规范 |
 |------|------|---------|
-| `frontend/index.html` | SPA 主入口 | 纯 HTML，含无障碍 ARIA 标签 |
+| `frontend/index.html` | SPA 主入口 | 纯 HTML，含无障碍 ARIA 标签 + 聊天页顶栏导航 |
+| `frontend/guide.html` | 使用指南页面 | 含功能概述/快速上手/操作指南/FAQ/注意事项，响应式设计 |
 | `frontend/package.json` | 前端依赖管理 | 仅含 vitest + jsdom（测试用） |
 | `frontend/vitest.config.js` | 前端测试配置 | - |
 | `frontend/css/variables.css` | CSS 自定义属性 | 色彩/字体/间距/圆角 |
 | `frontend/css/base.css` | 全局重置与基础样式 | - |
-| `frontend/css/layout.css` | 页面布局 | 栅格 + Flex |
+| `frontend/css/layout.css` | 页面布局 | 栅格 + Flex + 聊天页顶栏 |
 | `frontend/css/auth.css` | 登录/注册卡片 | - |
 | `frontend/css/chat.css` | 聊天消息与输入区域 | 含文件上传进度条样式 |
 | `frontend/css/sidebar.css` | 侧边栏组件 | - |
-| `frontend/css/responsive.css` | 响应式适配 + 暗色模式 | - |
+| `frontend/css/guide.css` | 指南页面样式 | 响应式（4断点）+ 暗色模式 + 动画 + 打印样式 |
+| `frontend/css/responsive.css` | 响应式适配 + 暗色模式 | 含顶栏移动端适配 |
 | `frontend/js/state.js` | 全局状态管理 | localStorage + sessionStorage |
 | `frontend/js/utils.js` | 工具函数 | DOM 操作/表单校验/防抖/HTML 转义 |
 | `frontend/js/api.js` | API 客户端 | 统一封装 REST 调用 + XHR 文件上传 |
