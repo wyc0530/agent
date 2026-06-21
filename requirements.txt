@@ -1,0 +1,54 @@
+# 学习辅助系统 - 依赖列表
+# Phase 1: 基础设施层
+
+# LangGraph & LangChain 核心
+langgraph>=1.2.0
+langgraph-checkpoint>=4.1.0
+langgraph-prebuilt>=1.1.0
+langchain-core>=1.4.0
+langchain-openai>=1.2.0
+langsmith>=0.8.0
+
+# LLM
+openai>=2.32.0
+tiktoken>=0.13.0
+
+# 百炼 Embedding
+dashscope>=1.20.0
+
+# 向量数据库 (Qdrant)
+qdrant-client>=1.16.0
+
+# 图数据库 (Neo4j)
+neo4j>=5.0.0
+
+# 数据处理
+numpy>=2.0.0
+pydantic>=2.13.0
+python-dotenv>=1.2.0
+
+# Web 搜索
+beautifulsoup4>=4.14.0
+requests>=2.33.0
+
+# API 服务
+fastapi>=0.136.0
+uvicorn>=0.47.0
+
+# 数据库
+mysql-connector-python>=9.0.0
+
+# 前端
+streamlit>=1.31.0
+
+# 文件处理
+PyPDF2>=3.0.0
+python-docx>=1.1.0
+
+# 测试
+pytest>=8.0.0
+pytest-asyncio>=1.0.0
+
+# 可选依赖 (按需安装)
+# sentence-transformers>=3.0.0  本地 Embedding 模型
+# google-search-results>=2.4.0  SerpAPI 官方客户端 (当前使用原始HTTP请求)

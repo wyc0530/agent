@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="学习辅助系统使用指南 - 快速上手与功能说明">
+  <meta name="theme-color" content="#4a5a7f">
+  <title>使用指南 - 学习辅助系统</title>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/guide.css">
+  <!-- 防止主题闪烁：在 CSS 加载前设置 data-theme -->
+  <script>
+    (function() {
+      var saved = localStorage.getItem('theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">跳至主内容</a>
+
+  <!-- ===== 顶部导航栏 ===== -->
+  <header class="guide-header" role="banner">
+    <div class="guide-header-inner">
+      <a href="index.html" class="header-logo" aria-label="返回首页">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/>
+        </svg>
+        <span>学习辅助系统</span>
+      </a>
+
+      <nav class="header-nav" aria-label="主导航">
+        <a href="#overview">功能概述</a>
+        <a href="#quickstart">快速上手</a>
+        <a href="#features">操作指南</a>
+        <a href="#faq">常见问题</a>
+        <a href="#tips">注意事项</a>
+      </nav>
+
+      <div class="header-actions">
+        <button id="btn-theme-toggle" class="btn-icon" aria-label="切换明暗主题" title="切换主题">
+          <svg class="icon-sun" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <a href="index.html" class="btn btn-primary btn-sm">进入系统</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== 主内容区 ===== -->
+  <main id="main-content" role="main">
+
+    <!-- Hero 区域 -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <span class="hero-badge">v1.0</span>
+        <h1 id="hero-title">学习辅助系统使用指南</h1>
+        <p class="hero-desc">
+          基于 AI 多智能体协作的个性化学习平台。7 个专业 Agent 覆盖学习规划、知识讲解、练习测评、错题复盘全流程，助你高效达成学习目标。
+        </p>
+        <div class="hero-actions">
+          <a href="#quickstart" class="btn btn-primary btn-lg">快速上手</a>
+          <a href="#features" class="btn btn-secondary btn-lg">查看功能</a>
+        </div>
+      </div>
+      <div class="hero-illustration" aria-hidden="true">
+        <svg width="260" height="200" viewBox="0 0 260 200" fill="none">
+          <rect x="20" y="30" width="220" height="140" rx="12" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="2"/>
+          <circle cx="70" cy="75" r="18" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="2"/>
+          <rect x="100" y="60" width="110" height="8" rx="4" fill="var(--color-border)"/>
+          <rect x="100" y="78" width="80" height="8" rx="4" fill="var(--color-border)"/>
+          <rect x="40" y="110" width="180" height="8" rx="4" fill="var(--color-border)"/>
+          <rect x="40" y="126" width="140" height="8" rx="4" fill="var(--color-border)"/>
+          <rect x="40" y="142" width="100" height="8" rx="4" fill="var(--color-border)"/>
+          <path d="M160 170l8-6 8 6v10h-16z" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="1.5"/>
+          <path d="M180 170l8-6 8 6v10h-16z" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="1.5"/>
+          <path d="M200 170l8-6 8 6v10h-16z" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 功能概述 -->
+    <section id="overview" class="section" aria-labelledby="overview-title">
+      <div class="section-header">
+        <h2 id="overview-title">功能概述</h2>
+        <p class="section-desc">7 个专业 Agent + 全链路学习闭环，覆盖从规划到复习的完整学习周期</p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="feature-icon" style="background:var(--color-accent-light);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <h3>学习规划</h3>
+          <p>Planner Agent 根据你的目标和时间，制定分阶段、可量化的学习计划。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon" style="background:#e8f0ea;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+          <h3>知识讲解</h3>
+          <p>Expert 与 Partner Agent 联手提供专业的知识解答、资料推荐和深度讲解。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon" style="background:#fef0e6;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3>智能出题</h3>
+          <p>Quizzer Agent 根据你的掌握程度自适应生成试题，精准评估学习效果。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon" style="background:#fdecea;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <h3>错题复盘</h3>
+          <p>Reviewer Agent 分析错题模式，定位薄弱知识点，反馈给规划 Agent 优化后续学习。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon" style="background:#e8eaf0;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <h3>文件上传分析</h3>
+          <p>支持 PDF、Word、TXT 及代码文件上传，上传后可针对文件内容提问并导出 Word 文档。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon" style="background:#e8f0ea;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3>备考指导</h3>
+          <p>Examiner Agent 提供考试策略、模拟面试和备考规划，助你从容应对各类考试。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 快速上手 -->
+    <section id="quickstart" class="section section-alt" aria-labelledby="quickstart-title">
+      <div class="section-header">
+        <h2 id="quickstart-title">快速上手</h2>
+        <p class="section-desc">三步开始你的智能学习之旅</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>注册账号</h3>
+          <p>打开系统后，点击"注册"标签，填写用户名和密码即可创建账号。建议填写昵称和邮箱以便后续找回密码。</p>
+          <div class="step-tip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>密码至少 6 个字符，建议包含字母和数字</span>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>选择 Agent</h3>
+          <p>登录后，在左侧边栏的"Agent 选择"面板中选择适合当前需求的 Agent 角色，或保持默认的"自动识别"让系统智能匹配。</p>
+          <div class="step-tip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>推荐首次使用选择"自动识别"，系统会根据你的问题自动路由</span>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>开始对话</h3>
+          <p>在底部输入框输入你的问题，按 Enter 发送。系统支持实时流式回复，也可以上传文件后再提问。</p>
+          <div class="step-tip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>Shift+Enter 换行，Enter 发送消息</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 操作指南 -->
+    <section id="features" class="section" aria-labelledby="features-title">
+      <div class="section-header">
+        <h2 id="features-title">操作指南</h2>
+        <p class="section-desc">掌握各项核心功能的使用方法</p>
+      </div>
+
+      <div class="guide-list">
+        <!-- 文件上传 -->
+        <article class="guide-item">
+          <div class="guide-item-header">
+            <span class="guide-item-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </span>
+            <h3>文件上传与分析</h3>
+          </div>
+          <div class="guide-item-body">
+            <ol>
+              <li>点击输入框左侧的 <strong>📎 附件按钮</strong>，或直接将文件拖拽到聊天区域</li>
+              <li>选择要上传的文件（支持 PDF、Word、TXT、Python、Java 等格式，最大 10MB）</li>
+              <li>上传进度条会实时显示上传状态，完成后文件标签会出现在输入框上方</li>
+              <li>在输入框中输入与文件内容相关的问题，按 Enter 发送</li>
+              <li>系统会基于文件内容生成回答，并自动生成可下载的 Word 文档</li>
+            </ol>
+            <div class="guide-note">
+              <strong>支持格式：</strong>PDF / Word (.docx, .doc) / TXT / .md / .py / .java / .cpp / .js / .ts / .html / .css / .json / .xml / .yaml / .csv
+            </div>
+          </div>
+        </article>
+
+        <!-- Agent 选择 -->
+        <article class="guide-item">
+          <div class="guide-item-header">
+            <span class="guide-item-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
+                <path d="M20 21a8 8 0 1 0-16 0"/>
+              </svg>
+            </span>
+            <h3>Agent 角色选择</h3>
+          </div>
+          <div class="guide-item-body">
+            <p>点击左侧边栏的 <strong>"Agent 选择"</strong> 面板，可以看到 7 种专业 Agent：</p>
+            <div class="agent-table-wrap">
+              <table class="agent-table">
+                <thead>
+                  <tr><th>Agent</th><th>适用场景</th><th>示例问题</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>自动识别</strong></td><td>不确定用哪个</td><td>任意问题，系统自动路由</td></tr>
+                  <tr><td><strong>学习规划师</strong></td><td>制定学习计划</td><td>"帮我制定一个 30 天的 Python 学习计划"</td></tr>
+                  <tr><td><strong>学习专家</strong></td><td>获取知识讲解</td><td>"推荐适合初学者的机器学习课程"</td></tr>
+                  <tr><td><strong>学习伙伴</strong></td><td>日常答疑解惑</td><td>"什么是 RESTful API？"</td></tr>
+                  <tr><td><strong>出题官</strong></td><td>练习与自测</td><td>"给我出 5 道数据结构的选择题"</td></tr>
+                  <tr><td><strong>复习助理</strong></td><td>错题整理分析</td><td>"帮我分析最近的错题，找出薄弱知识点"</td></tr>
+                  <tr><td><strong>考试指导</strong></td><td>备考规划</td><td>"考研计算机专业如何高效复习？"</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+
+        <!-- 对话管理 -->
+        <article class="guide-item">
+          <div class="guide-item-header">
+            <span class="guide-item-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </span>
+            <h3>对话管理</h3>
+          </div>
+          <div class="guide-item-body">
+            <ul>
+              <li><strong>新建对话：</strong>点击侧边栏"历史对话"旁的 <code>+</code> 按钮，创建新的对话线程</li>
+              <li><strong>切换对话：</strong>点击历史对话列表中的任意对话，加载该对话的完整消息记录</li>
+              <li><strong>删除对话：</strong>点击对话旁的删除按钮，移除不再需要的对话</li>
+              <li><strong>删除单条消息：</strong>鼠标悬停在用户消息上，点击"删除"按钮可移除该问答对</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 文档导出 -->
+        <article class="guide-item">
+          <div class="guide-item-header">
+            <span class="guide-item-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </span>
+            <h3>文档导出</h3>
+          </div>
+          <div class="guide-item-body">
+            <p>AI 回复支持导出为 Word 文档：</p>
+            <ul>
+              <li>每条 AI 回复消息下方都有 <strong>"下载 Word"</strong> 按钮</li>
+              <li>点击后自动下载格式化的 Word 文档，包含问题、回答和生成时间</li>
+              <li>文件上传后提问的回答也会自动生成可下载的 Word 文档</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 主题与设置 -->
+        <article class="guide-item">
+          <div class="guide-item-header">
+            <span class="guide-item-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </span>
+            <h3>主题切换</h3>
+          </div>
+          <div class="guide-item-body">
+            <ul>
+              <li><strong>主题切换：</strong>点击侧边栏的"主题"按钮，在明暗模式之间切换，系统会记住你的偏好</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 常见问题 -->
+    <section id="faq" class="section section-alt" aria-labelledby="faq-title">
+      <div class="section-header">
+        <h2 id="faq-title">常见问题</h2>
+        <p class="section-desc">FAQ</p>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">文件上传后无法提问怎么办？</span>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="faq-a">
+            <p>请确认以下几点：</p>
+            <ul>
+              <li>文件已成功上传（输入框上方出现文件标签，显示文件名）</li>
+              <li>文件格式在支持范围内（PDF、Word、TXT、代码文件等）</li>
+              <li>文件大小不超过 10MB</li>
+              <li>在输入框中输入与文件相关的问题后再发送</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">为什么 AI 回复有时会比较慢？</span>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="faq-a">
+            <p>AI 回复速度取决于以下因素：</p>
+            <ul>
+              <li>选择的 Agent 类型（如 Planner 需要更长的推理时间）</li>
+              <li>LLM 服务商的当前负载情况</li>
+              <li>是否启用了 Web 搜索（Expert Agent 需要联网检索）</li>
+              <li>消息历史长度（更长的对话历史需要更多处理时间）</li>
+            </ul>
+            <p>通常回复时间在 3-30 秒之间，如果超过 120 秒系统会自动超时并提示重试。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">对话历史能保存多久？</span>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="faq-a">
+            <p>对话历史通过 MySQL 数据库持久化存储，理论上可以永久保存。系统会自动管理：</p>
+            <ul>
+              <li>单对话最多保留 200 条消息（超出后自动裁剪旧消息）</li>
+              <li>内存中的对话缓存超过 24 小时未活跃自动清理</li>
+              <li>磁盘上的对话历史会定期保存，服务重启后自动恢复</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">支持哪些文件格式？文件大小有限制吗？</span>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="faq-a">
+            <p><strong>支持格式：</strong>PDF、Word (.docx/.doc)、TXT、Markdown、以及 Python/Java/C++/JavaScript/TypeScript/HTML/CSS/JSON/XML/YAML/CSV 等代码文件。</p>
+            <p><strong>大小限制：</strong>单个文件最大 10MB。超过限制的文件会被拒绝并提示错误信息。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">可以同时上传多个文件吗？</span>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="faq-a">
+            <p>目前系统支持单次上传一个文件。如需分析多个文件，可以依次上传，上传后的文件会以标签形式显示在输入框上方。当前版本中，提问时会将第一个上传文件的内容作为上下文发送给 AI。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">系统需要联网吗？</span>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="faq-a">
+            <p>系统核心功能需要联网访问 LLM API（如 OpenAI、ModelScope 等）。如果配置了本地 LLM（如 Ollama），则可以在离线环境下使用。Web 搜索功能需要额外配置 SerpAPI 密钥。</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">忘记密码怎么办？</span>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="faq-a">
+            <p>当前版本暂不支持自主密码找回功能。如需重置密码，请联系系统管理员在数据库层面进行操作。建议注册时填写邮箱，以便后续版本支持邮箱找回功能。</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- 注意事项 -->
+    <section id="tips" class="section" aria-labelledby="tips-title">
+      <div class="section-header">
+        <h2 id="tips-title">注意事项</h2>
+        <p class="section-desc">使用前请仔细阅读以下重要提示</p>
+      </div>
+
+      <div class="tips-grid">
+        <div class="tip-card tip-warning">
+          <div class="tip-card-header">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <h3>安全提醒</h3>
+          </div>
+          <ul>
+            <li>请勿上传包含个人隐私或敏感信息的文件</li>
+            <li>API 密钥等敏感信息请妥善保管，不要分享给他人</li>
+            <li>生产环境部署时务必启用 <code>API_AUTH_ENABLED=true</code></li>
+            <li>定期修改密码，使用强密码保护账号安全</li>
+          </ul>
+        </div>
+
+        <div class="tip-card tip-info">
+          <div class="tip-card-header">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <h3>使用建议</h3>
+          </div>
+          <ul>
+            <li>建议使用现代浏览器（Chrome/Firefox/Edge 最新版）</li>
+            <li>首次使用建议从"自动识别"Agent 开始，熟悉后再尝试特定 Agent</li>
+            <li>文件上传后建议先提问，不要直接发送空白消息</li>
+            <li>AI 生成的回答仅供参考，重要决策请交叉验证</li>
+          </ul>
+        </div>
+
+        <div class="tip-card tip-note">
+          <div class="tip-card-header">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+            <h3>技术限制</h3>
+          </div>
+          <ul>
+            <li>文件上传后服务重启会导致文件 ID 失效，需重新上传</li>
+            <li>Word 文档中文字体偶有排版偏移，属 python-docx 已知限制</li>
+            <li>前端直接通过 <code>file://</code> 协议打开可能存在跨域问题，建议使用 <code>http.server</code> 托管</li>
+            <li>大文件（接近 10MB）上传时进度条显示 0-90%，剩余时间依赖服务器处理</li>
+          </ul>
+        </div>
+
+        <div class="tip-card tip-success">
+          <div class="tip-card-header">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <h3>最佳实践</h3>
+          </div>
+          <ul>
+            <li>提问时尽量具体明确，包含上下文信息以获得更精准的回答</li>
+            <li>善用对话管理功能，为不同学习主题创建独立对话</li>
+            <li>使用"出题官"Agent 定期自测，巩固学习效果</li>
+            <li>将重要的 AI 回答导出为 Word 文档保存到本地</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== 页脚 ===== -->
+  <footer class="guide-footer" role="contentinfo">
+    <div class="guide-footer-inner">
+      <div class="footer-brand">
+        <strong>学习辅助系统</strong>
+        <span>v1.0.0</span>
+      </div>
+      <nav class="footer-links" aria-label="页脚导航">
+        <a href="index.html">返回系统</a>
+        <a href="#overview">功能概述</a>
+        <a href="#faq">常见问题</a>
+      </nav>
+      <p class="footer-copy">基于 LangGraph + FastAPI 构建 &middot; AI 多智能体协作学习平台</p>
+    </div>
+  </footer>
+
+  <!-- 主题切换 -->
+  <script>
+    (function() {
+      var btn = document.getElementById('btn-theme-toggle');
+      if (btn) {
+        btn.addEventListener('click', function() {
+          var html = document.documentElement;
+          var current = html.getAttribute('data-theme');
+          var next = current === 'dark' ? 'light' : 'dark';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

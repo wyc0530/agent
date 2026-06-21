@@ -1,0 +1,72 @@
+/* ===== 响应式设计 ===== */
+
+/* 平板及以下 */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex;
+  }
+  .sidebar-overlay.open {
+    display: block;
+  }
+  .main-content,
+  .sidebar.open ~ .main-content {
+    margin-left: 0;
+  }
+  .message {
+    max-width: 92%;
+  }
+  .auth-card {
+    max-width: 100%;
+    padding: var(--space-6) var(--space-5);
+    margin: var(--space-4);
+  }
+  .chat-messages {
+    padding: var(--space-4);
+  }
+  .chat-input-area {
+    padding: var(--space-2) var(--space-4) var(--space-3);
+  }
+  .toast-container {
+    left: var(--space-4);
+    right: var(--space-4);
+    max-width: none;
+  }
+
+  /* 顶栏移动端适配 */
+  .chat-topbar {
+    height: 48px;
+    padding: 0 var(--space-4);
+  }
+  .chat-topbar-title {
+    font-size: var(--text-sm);
+  }
+}
+
+/* 小屏手机 */
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+  .quick-actions {
+    flex-direction: column;
+  }
+  .message {
+    max-width: 95%;
+  }
+  .message-content {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
